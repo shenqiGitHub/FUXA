@@ -14,21 +14,31 @@
                 <span>{{'recipe.list-recipeName' | translate}}</span>
                 <input [(ngModel)]="data.recipe.recipeName" style="width: 350px" type="text">
             </div>
+            <div class="my-form-field" style="display: block;margin-bottom: 10px;">
+                <span>{{'recipe.list-devicetype' | translate}}</span>
+                <mat-form-field>
+                    <mat-select [(ngModel)]="data.recipe.deviceType">
+                        <mat-option *ngFor="let devicetype of deviceTypes|enumToArray"  [value]="devicetype.value">
+                            {{ devicetype.value }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
 
+            </div>
             <div class="my-form-field" style="display: inline-block;margin-bottom: 10px;" >
                 <span>{{'recipe.list-description' | translate}}</span>
                 <input [(ngModel)]="data.recipe.description" style="width: 350px" type="text">
             </div>
-            <div>
+            <div class="my-form-field" style="display: block;margin-bottom: 10px;">
                 <span>{{'recipe.list-version' | translate}}</span>
                 <input [(ngModel)]="data.recipe.version"  style="width: 350px" type="text">
             </div>
-            <div>
+            <div class="my-form-field" style="display: block;margin-bottom: 10px;">
                 <span>{{'recipe.detail.dbBlockAddress' | translate}}</span>
                 <input [(ngModel)]="data.recipe.dbBlockAddress" (ngModelChange)="ondbBlockAddressChange()">
             </div>
 
-            <div class="container">
+            <div class="container" *ngIf="ifS7deviceType(data.recipe.deviceType)">
                 <mat-table #table [dataSource]="detail" matSort>
                     <ng-container matColumnDef="address">
                         <mat-header-cell *matHeaderCellDef mat-sort-header> {{'recipe.detail.address' | translate}} </mat-header-cell>
@@ -46,12 +56,12 @@
                     <mat-row *matRowDef="let row; columns: displayedColumns;" class="my-mat-row" [ngStyle]="{'min-width.px': tableWidth}"></mat-row>
                 </mat-table>
             </div>
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; justify-content: space-between;" *ngIf="ifS7deviceType(data.recipe.deviceType)">
                 <mat-form-field *ngIf="!autoIncrement">
                     <input matInput [(ngModel)]="manualAddress" placeholder="DB Address"  >
                 </mat-form-field>
                 <mat-form-field>
-                    <mat-select [(value)]="currentType" (change)="currentValue = '';">
+                    <mat-select [(ngModel)]="currentType" (change)="currentValue = '';">
                         <mat-option *ngFor="let type of recipeDetailMateTypes | enumToArray" [value]="type.value">
                             {{ type.value }}
                         </mat-option>
@@ -59,7 +69,7 @@
                 </mat-form-field>
 
                 <mat-form-field *ngIf="currentType === 'BOOL'">
-                    <mat-select [(value)]="currentValue">
+                    <mat-select [(ngModel)]="currentValue">
                         <mat-option value="true">True</mat-option>
                         <mat-option value="false">False</mat-option>
                     </mat-select>

@@ -725,6 +725,7 @@
     "device.not-webapi-result": "配置WebAPI的结果",
     "device.property-show": "显示设备属性",
     "device.property-hide": "隐藏设备属性",
+    "device.upload-recipe": "上载配方信息",
     "device.security-none": "无",
     "device.security-sign": "签名",
     "device.security-signandencrypt": "签名和加密",

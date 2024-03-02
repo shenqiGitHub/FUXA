@@ -816,6 +816,7 @@
     "devices.list-status": "状态",
 
     "recipe.list-recipeName":"名称",
+    "recipe.list-devicetype":"类型",
     "recipe.list-description":"描述",
     "recipe.list-createtime": "创建时间",
     "recipe.list-lastModifiedTime": "创建时间",

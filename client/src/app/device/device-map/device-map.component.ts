@@ -7,6 +7,7 @@ import { MatSort } from '@angular/material/sort';
 import { TranslateService } from '@ngx-translate/core';
 
 import { DevicePropertyComponent } from './../device-property/device-property.component';
+import { RecipeUploadComponent } from './../../recipe/recipe-upload/recipe-upload.component'
 import { ProjectService } from '../../_services/project.service';
 import { PluginService } from '../../_services/plugin.service';
 import { Device, DeviceType, DeviceNetProperty, DEVICE_PREFIX, DeviceViewModeType, DeviceConnectionStatusType } from './../../_models/device';
@@ -364,6 +365,29 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
     onListDevice(device: Device) {
         this.goto.emit(device);
     }
+
+    onUploadRecipe(device: Device){
+        this.uploadRecipe(device);
+    }
+
+    private uploadRecipe(device: Device){
+        let dialogRef = this.dialog.open(RecipeUploadComponent,
+            {
+                panelClass: 'dialog-property',
+                data: {
+                    devices:this.devices,
+                    availableType: this.plugins,
+                    projectService: this.projectService
+                },
+                position: { top: '60px' }
+            }           
+            );
+        dialogRef.afterClosed().subscribe(result => {
+          if(result){
+            console.log('dialog close');
+          }
+        })
+      }
 
     isDevicePropertyToShow(device: Device) {
         if (device.property && device.type !== 'OPCUA') {

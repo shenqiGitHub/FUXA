@@ -11,7 +11,9 @@ import { SelOptionsComponent } from '../gui-helpers/sel-options/sel-options.comp
 
 import {RecipeService} from '../_services/recipe.service';
 
-import {Recipe, RecipeDetailType} from '../_models/recipe';
+import {Recipe} from '../_models/recipe';
+import { RecipeDetailType, DeviceTypes} from '../_models/enum';
+
 import {User} from "../_models/user";
 
 @Component({
@@ -22,7 +24,7 @@ import {User} from "../_models/user";
 export class RecipeComponent implements OnInit, AfterViewInit {
 
   @ViewChild(SelOptionsComponent, {static: false}) seloptions: SelOptionsComponent;
-  displayedColumns = ['select', 'recipeName', 'creationTime', 'lastModifiedTime', 'version', 'isActive', 'uploadRecipe', 'remove'];
+  displayedColumns = ['select', 'recipeName', 'creationTime', 'lastModifiedTime', 'version', 'isActive', 'remove'];
   dataSource = new MatTableDataSource([]);
 
   recipes: Recipe[];
@@ -54,10 +56,6 @@ export class RecipeComponent implements OnInit, AfterViewInit {
 
     onEditRecipe(recipe: Recipe){
     this.editRecipe(recipe);
-    }
-
-    onUploadRecipe(recipe: Recipe){
-      // this.onUploadRecipe(recipe, recipe);
     }
 
     onRemoveRecipe(recipe: Recipe) {
@@ -111,6 +109,7 @@ export class RecipeComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
   private bindToTable(recipes) {
     this.dataSource.data = recipes;
   }
@@ -129,10 +128,13 @@ export class DialogRecipe {
 
   public recipeDetailMateTypes = Object.values(RecipeDetailType);
 
+  public deviceTypes = DeviceTypes;
+
 
   description: string = null;
   dbBlockAddress: string = '';
   detail = [];
+
   currentType: string = 'BOOL';
   currentValue: any;
 
@@ -143,9 +145,13 @@ export class DialogRecipe {
 
   constructor(public dialogRef: MatDialogRef<DialogRecipe>,
               @Inject(MAT_DIALOG_DATA) public data: any) {
-                this.detail = data.recipe.detail;
+                this.detail = data.recipe.detail ?? [];
+                data.recipe.deviceType = data.recipe.deviceType ?? DeviceTypes.SiemensS7.valueOf();
   }
 
+  ifS7deviceType(deviceType: String):boolean {
+    return deviceType === DeviceTypes.SiemensS7.valueOf();
+  }
 
     addEntry() {
         if (!this.isValidValue()) {
@@ -199,6 +205,7 @@ export class DialogRecipe {
 
     getNextAddress() {
         let byteNumber,lastindex;
+        console.log('length:' + this.detail.length.toString);
         let isfirstRow = this.detail.length == 0;
         if(!isfirstRow){
             const lastEntry = this.detail[this.detail.length - 1];

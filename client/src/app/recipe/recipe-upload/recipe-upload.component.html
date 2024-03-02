@@ -1,1 +1,33 @@
-<p>recipe-upload works!</p>
+<div style="width: 100%;position: relative;">
+
+	<div *ngIf="isToRemove" style="margin-top: 20px;margin-bottom: 20px;">
+		{{'msg.recipe-remove' | translate}} '{{data.recipe.recipeName}}' ?
+	</div>
+	<div *ngIf="!isToRemove">
+		<h1 mat-dialog-title style="display:inline-block; cursor:move; padding-top: 15px" mat-dialog-draggable >
+		    {{'recipe.property' | translate}}</h1>
+		<mat-icon (click)="onNoClick()" style="float:right;cursor:pointer;color:gray;position: relative; top: 10px; right: 0px">clear</mat-icon>
+	</div>
+	<div style="overflow-y: hidden; overflow-x: hidden; padding-top: 5px;" *ngIf="!isToRemove">
+		<div class="my-form-field" style="display: block;margin-bottom: 10px;">
+	</div>
+	<div class="container">
+		<mat-table #table [dataSource]="dataSource" matSort>
+			<ng-container matColumnDef="recipeName">
+				<mat-header-cell *matHeaderCellDef mat-sort-header> {{'devices.list-name' | translate}} </mat-header-cell>
+				<mat-cell *matCellDef="let element">{{element.recipeName}}</mat-cell>
+			</ng-container>
+			<ng-container matColumnDef="cloudUpload">
+				<mat-header-cell *matHeaderCellDef mat-sort-header> {{'recipe.upload' | translate}} </mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<button mat-icon-button (click)="onclickUpload(element)">
+						<mat-icon>cloud_upload</mat-icon>
+					</button>
+				</mat-cell>
+			</ng-container>
+			<mat-header-row *matHeaderRowDef="displayedColumns" [ngStyle]="{'min-width.px': tableWidth}"></mat-header-row>
+			<mat-row *matRowDef="let row; columns: displayedColumns;" class="my-mat-row" [ngStyle]="{'min-width.px': tableWidth}"></mat-row>
+		</mat-table>
+		<mat-paginator [pageSizeOptions]="[10, 25, 100]" [pageSize]="25" style="position: relative; right: 100px;"></mat-paginator>
+	</div>
+</div>

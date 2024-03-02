@@ -28,8 +28,9 @@
       "name": "Client Chrome localhost",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:4200/#",
-      "webRoot": "${workspaceFolder}/client/src"
+      "preLaunchTask": "npm: start",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/client"
     },
     {
       "type": "node",
@@ -42,5 +43,16 @@
         "--env=test"
       ]
     },
-  ]
+  ],
+  "tasks": [
+	  {
+	    "label": "npm: start",
+	    "type": "shell",
+	    "command": "npm",
+	    "args": ["start"],
+	    "options": {
+	      "cwd": "${workspaceFolder}/client" // 设置工作目录为子路径
+	    }
+	  }
+	]
 }

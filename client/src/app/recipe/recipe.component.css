@@ -160,6 +160,11 @@
     border-radius: 2px;
 }
 
+.my-select-field {
+    background-color: black;
+
+}
+
 .context-menu {
     font-size: 13px;
 }

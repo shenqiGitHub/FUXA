@@ -33,7 +33,7 @@ function _bind(){
             logger.info('recipesstorage.connected-to ' + dbfile + ' database.', true);
         });
         // prepare query
-        var sql = "CREATE TABLE IF not exists recipes(recipeId INTEGER NOT NULL,recipeName TEXT NOT NULL,description INTEGER,creationTime INTEGER NOT NULL,lastModifiedTime INTEGER NOT NULL,dbBlockAddress TEXT, version TEXT,isActive INTEGER NOT NULL,detail TEXT NOT NULL,PRIMARY KEY(recipeId AUTOINCREMENT));";
+        var sql = "CREATE TABLE IF not exists recipes(recipeId INTEGER NOT NULL,recipeName TEXT NOT NULL,deviceType TEXT NOT NULL, description INTEGER,creationTime INTEGER NOT NULL,lastModifiedTime INTEGER NOT NULL,dbBlockAddress TEXT, version TEXT,isActive INTEGER NOT NULL,detail TEXT NOT NULL,PRIMARY KEY(recipeId AUTOINCREMENT));";
         db_recipes.exec(sql, function (err) {
             if (err) {
                 logger.error('recipesstorage.failed-to-bind: ' + err);
@@ -50,13 +50,14 @@ function addRecipe(recipe) {
         // 注意: 我们不再手动为recipeId提供值，SQLite会自动处理
         var sql = `
             INSERT INTO recipes (
-                recipeName, description, creationTime, lastModifiedTime, dbBlockAddress, version, isActive, detail
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                recipeName, description, deviceType, creationTime, lastModifiedTime, dbBlockAddress, version, isActive, detail
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
         `;
         var value =  JSON.stringify(recipe.detail).replace(/\'/g,"''")
         var params = [
             recipe.recipeName,
             recipe.description,
+            recipe.deviceType,
             recipe.creationTime,
             recipe.lastModifiedTime,
             recipe.dbBlockAddress,
@@ -78,7 +79,7 @@ function addRecipe(recipe) {
 
 function getRecipes(){
     return new Promise(function (resolve, reject) {
-        var sql = `SELECT recipeId, recipeName, description, creationTime, lastModifiedTime, dbBlockAddress, version, isActive, detail
+        var sql = `SELECT recipeId, recipeName, deviceType, description, creationTime, lastModifiedTime, dbBlockAddress, version, isActive, detail
                    FROM recipes `;
         db_recipes.all(sql, function (err, rows) {
             if (err) {
