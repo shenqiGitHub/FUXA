@@ -12,6 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService, UserProfile } from './auth.service';
+import {Recipe} from "../_models/recipe";
 
 @Injectable()
 export class HmiService {
@@ -97,6 +98,14 @@ export class HmiService {
                 // for demo, only frontend
                 this.setSignalValue(this.variables[sigId]);
             }
+        }
+    }
+
+    public putRecipeValue(deviceId: string, recipe: Recipe){
+        if(this.socket){
+            let msg = { deviceId: deviceId, recipe: recipe };
+
+            this.socket.emit(IoEventTypes.RECIPE_UPLOAD,  {cmd: 'set', var: msg});
         }
     }
 
@@ -602,7 +611,8 @@ export enum IoEventTypes {
     ALARMS_STATUS = 'alarms-status',
     HOST_INTERFACES = 'host-interfaces',
     SCRIPT_CONSOLE = 'script-console',
-    SCRIPT_COMMAND = 'script-command'
+    SCRIPT_COMMAND = 'script-command',
+    RECIPE_UPLOAD = 'recipe-upload'
 }
 
 const ScriptCommandEnum = {

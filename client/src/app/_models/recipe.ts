@@ -19,3 +19,8 @@ export class RecipeDetail {
     type: RecipeDetailType;
     value: string | number | boolean;
 }
+
+export enum RecipeDataCmdType{
+    SetUpRecipe = 'set-up-recpie',
+    DelRecipe = 'del-recipe',
+}

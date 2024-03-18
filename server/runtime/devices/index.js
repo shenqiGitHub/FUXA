@@ -299,6 +299,17 @@ function setDeviceValue(deviceid, sigid, value, fnc) {
 }
 
 /**
+ * Set Recipe to PLC
+ * @param {*} deviceid 
+ * @param {*} data 
+ */
+function setRecipeValue(deviceid, data){
+    if(activeDevices[deviceid]){
+        activeDevices[deviceid].setValueByRecipe(data);
+    }
+}
+
+/**
  * Set connection device status to server tag
  * @param {*} deviceId 
  * @param {*} status 
@@ -402,5 +413,6 @@ var devices = module.exports = {
     isWoking: isWoking,
     getSupportedProperty: getSupportedProperty,
     getRequestResult: getRequestResult,
-    getTagFormat: getTagFormat
+    getTagFormat: getTagFormat,
+    setRecipeValue: setRecipeValue
 }

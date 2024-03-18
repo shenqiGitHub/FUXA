@@ -98,6 +98,27 @@ function getRecipes(){
     });
 }
 
+function getActiveRecipesByDeviceType(type){
+    return new Promise(function (resolve, reject) {
+        var sql = "SELECT recipeId, recipeName, deviceType, description, creationTime, lastModifiedTime, dbBlockAddress, version, isActive, detail "
+        + "FROM recipes WHERE isActive=1 AND deviceType='" + type + "'";
+        db_recipes.all(sql, function (err, rows) {
+            if (err) {
+                reject(err);
+            } else {
+                const recipesWithArrayDetail = rows.map(row => {
+                    return {
+                        ...row,
+                        detail: JSON.parse(row.detail)
+                    };
+                });
+                resolve(recipesWithArrayDetail);
+            }
+        });
+    });
+}
+
+
 
 function updateRecipe(query) {
     return new Promise(function (resolve, reject) {
@@ -171,5 +192,6 @@ module.exports = {
     addRecipe: addRecipe,
     getRecipes: getRecipes,
     updateRecipe:updateRecipe,
-    removeRecipe : removeRecipe
+    removeRecipe : removeRecipe,
+    getActiveRecipesByDeviceType: getActiveRecipesByDeviceType
 };

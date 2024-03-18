@@ -145,6 +145,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
         // client ask device values
         socket.on(Events.IoEventTypes.DEVICE_VALUES, (message) => {
             try {
+                
                 if (message === 'get') {
                     var adevs = devices.getDevicesValues();
                     for (var id in adevs) {
@@ -153,7 +154,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
                 } else if (message.cmd === 'set' && message.var) {
                     devices.setDeviceValue(message.var.source, message.var.id, message.var.value, message.fnc);
                     logger.info(`${Events.IoEventTypes.DEVICE_VALUES}: ${message.var.source} ${message.var.id} = ${message.var.value}`);
-                }
+                } 
             } catch (err) {
                 logger.error(`${Events.IoEventTypes.DEVICE_VALUES}: ${err}`);
             }
@@ -303,6 +304,16 @@ function init(_io, _api, _settings, _log, eventsMain) {
                 logger.error(`${Events.IoEventTypes.DEVICE_TAGS_UNSUBSCRIBE}: ${err}`);
             }
         });
+        socket.on(Events.IoEventTypes.RECIPE_UPLOAD, (message) => {
+            try{
+                if(message.cmd === 'set'){
+                    devices.setRecipeValue(message.var.deviceId, message.var.recipe.detail);
+                    logger.info(`${Events.IoEventTypes.RECIPE_UPLOAD}: ${message.var.deviceId} - value = ${message.var.recipeValues}`);
+                }
+            }catch (err){
+                logger.error(`${Events.IoEventTypes.RECIPE_UPLOAD}: ${err}`);
+            }
+        })
     });
 }
 

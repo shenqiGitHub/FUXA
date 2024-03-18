@@ -21,6 +21,7 @@ const IoEventTypes = {
     HOST_INTERFACES: 'host-interfaces',
     SCRIPT_CONSOLE: 'script-console',
     SCRIPT_COMMAND: 'script-command',
+    RECIPE_UPLOAD: 'recipe-upload'
 }
 
 // module.exports = IoEventTypes;

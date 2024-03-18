@@ -227,6 +227,10 @@ function Device(data, runtime) {
         return comm.setValue(id, value);
     }
 
+    this.setValueByRecipe = function (RecipeDetailData){
+        return comm.setValueByRecipe(RecipeDetailData);
+    }
+
     /**
      * Call Device to return browser result Tags/Nodes (only OPCUA)
      */

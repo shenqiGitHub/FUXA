@@ -108,7 +108,7 @@ function S7client(_data, _logger, _events) {
                 })
             }
             Promise.all(readVarsfnc).then(result => {
-                _checkWorking(false);
+                    _checkWorking(false);
                 if (result.length) {
                     let varsValueChanged = _updateVarsValue(result);
                     lastTimestampValue = new Date().getTime();
@@ -236,6 +236,25 @@ function S7client(_data, _logger, _events) {
                     logger.error(`'${data.name}' _writeVars error! ${reason}`);
                 }
             });
+        }
+    }
+
+    this.setValueByRecipe = function(data){
+        for(let i=0; i < data.length; i++){
+            var item = _getDbItem(data[i].address, data[i].type);
+            if(item) {
+                value = deviceUtils.tagRawCalculator(data[i].value);
+                item.value = value;
+                _writeVars([item], (item instanceof DbItem)).then(result => {
+                    logger.info(`'${data.name}' setValue(${sigid}, ${value})`, true);
+                }, reason => {
+                    if (reason && reason.stack) {
+                        logger.error(`'${data.name}' _writeVars error! ${reason.stack}`);
+                    } else {
+                        logger.error(`'${data.name}' _writeVars error! ${reason}`);
+                    }
+                });              
+            }
         }
     }
 
@@ -542,13 +561,18 @@ function S7client(_data, _logger, _events) {
         });
     }
 
+
+    var _getTagItem = function(tag){
+        return _getDbItem(tag.address, tag.type);
+    }
+
     /**
      * Return the Tag object (DbItem) with value
      * DB X DBX 10.3 = Bool, DB X DBB 10 = Byte/Char, DB X DBW 10 = Int/Word, DB X DBD 10 = DInt/DWord, DB X DBD 10 = Real
      */
-    var _getTagItem = function (tag) {
+    var _getDbItem = function (address, type) {
         try {
-            var variable = tag.address.toUpperCase().split(' ').join('');
+            var variable = address.toUpperCase().split(' ').join('');
             if (variable) {
                 var prefix = variable.substring(0, 2);
                 if (prefix === 'DB') {
@@ -560,7 +584,7 @@ function S7client(_data, _logger, _events) {
                         var dbType = variable.substring(startpos + 1, startpos + 4);
                         var dbStart = variable.substring(startpos + 4);
                         var result = new DbItem(dbNum);
-                        result.type = tag.type.toUpperCase();
+                        result.type = type.toUpperCase();
                         result.Area = s7client['S7AreaDB'];
                         if (dbType === 'DBB') {
                             result.Start = parseInt(dbStart);
@@ -589,7 +613,7 @@ function S7client(_data, _logger, _events) {
                         }
                     }
                 } else {
-                    var type = tag.type.toUpperCase();
+                    var type = type.toUpperCase();
                     var len = datatypes[type].S7WordLen;
                     switch (prefix) {
                         case 'EB':

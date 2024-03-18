@@ -27,7 +27,7 @@ export class RecipeComponent implements OnInit, AfterViewInit {
   displayedColumns = ['select', 'recipeName', 'creationTime', 'lastModifiedTime', 'version', 'isActive', 'remove'];
   dataSource = new MatTableDataSource([]);
 
-  recipes: Recipe[];
+  recipes: {};
 
   @ViewChild(MatTable, {static: false}) table: MatTable<any>;
   @ViewChild(MatSort, {static: false}) sort: MatSort;
@@ -42,31 +42,33 @@ export class RecipeComponent implements OnInit, AfterViewInit {
 
 
     ngOnInit() {
-    this.loadRecipes();
+        this.loadRecipeData();
     }
 
     ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
+        this.dataSource.sort = this.sort;
     }
 
     onAddRecipe(){
-    let recipe = new Recipe();
-    this.editRecipe(recipe);
+        let recipe = new Recipe();
+        this.editRecipe(recipe, false);
     }
 
     onEditRecipe(recipe: Recipe){
-    this.editRecipe(recipe);
+        this.editRecipe(recipe, false);
     }
 
     onRemoveRecipe(recipe: Recipe) {
-    this.editRecipe(recipe);
+        this.editRecipe(recipe, true);
     }
 
     toggleIsActive(event: MatSlideToggleChange, element: Recipe) {
       element.isActive = event.checked ? 1 : 0;
-      this.recipeService.setRecipe(element).subscribe(result => {
-        this.loadRecipes();
-      });
+      this.recipeService.setOrUpdateRecipe(element);
+      this.loadRecipes();
+      // this.recipeService.setOrUpdateRecipe(element).subscribe(result => {
+      //   this.loadRecipes();
+      // });
       console.log(element);
       // 在这里执行其他处理开关状态更改的操作，例如向服务器发送更新请求
     }
@@ -79,41 +81,51 @@ export class RecipeComponent implements OnInit, AfterViewInit {
     }
     }
 
-  private loadRecipes() {
-    this.recipes = [];
-    this.recipeService.getRecipes(null).subscribe(result => {
+  private loadRecipeData() {
+    this.recipes = {};
+    this.recipeService.getRecipes().subscribe(result => {
       Object.values<Recipe>(result).forEach(
         r => {
-         this.recipes.push(r);
+         this.recipes[r.recipeId] = r;
       });
-      this.bindToTable(this.recipes);
+      this.loadRecipes();
     }, err => {
       console.error('get Users err: ' + err);
     });
   }
 
+  loadRecipes(){
+    this.dataSource.data = Object.values(this.recipes);
+  }
 
 
-  private editRecipe(recipe: Recipe) {
+
+  private editRecipe(recipe: Recipe, toremove: boolean) {
     let mrecipe: Recipe = JSON.parse(JSON.stringify(recipe));
     let dialogRef = this.dialog.open(DialogRecipe, {
         position: { top: '60px' },
-        data: { recipe: mrecipe}
+        data: { recipe: mrecipe, remove: toremove}
     });
     dialogRef.afterClosed().subscribe(result => {
       if(result){
-        console.log('dialog close');
-        this.recipeService.setRecipe(result).subscribe(result => {
-          this.loadRecipes();
-        });
+        if(toremove){
+          this.removeRecipe(recipe);
+          this.recipeService.removeRecipe(recipe.recipeId);
+        }else{
+          this.recipeService.setOrUpdateRecipe(result);
+          this.loadRecipeData();
+        }
       }
     });
   }
 
-  private bindToTable(recipes) {
-    this.dataSource.data = recipes;
+  private removeRecipe(recipe: Recipe) {
+    delete this.recipes[recipe.recipeId];
+    this.loadRecipes();
   }
 }
+
+
 @Component({
   selector: 'app-dialog-recipe',
   templateUrl: './recipe-property.dialog.html',
@@ -124,6 +136,7 @@ export class RecipeComponent implements OnInit, AfterViewInit {
 export class DialogRecipe {
   autoIncrement: boolean = true;
   manualAddress: string = '';
+  isToRemove: boolean = false;
 
 
   public recipeDetailMateTypes = Object.values(RecipeDetailType);
@@ -139,7 +152,6 @@ export class DialogRecipe {
   currentValue: any;
 
   @ViewChild(SelOptionsComponent, {static: false}) seloptions: SelOptionsComponent;
-  isToRemove: boolean = false;
     displayedColumns = ['address', 'type',  'value'];
     tableWidth = 1200;
 
@@ -147,6 +159,10 @@ export class DialogRecipe {
               @Inject(MAT_DIALOG_DATA) public data: any) {
                 this.detail = data.recipe.detail ?? [];
                 data.recipe.deviceType = data.recipe.deviceType ?? DeviceTypes.SiemensS7.valueOf();
+  }
+
+  ngOnInit() {
+    this.isToRemove = this.data.remove;
   }
 
   ifS7deviceType(deviceType: String):boolean {
@@ -158,7 +174,7 @@ export class DialogRecipe {
             alert('Invalid value!');  // 你可以选择其他方式显示错误，比如SnackBar。
             return;
         }
-        const address = this.autoIncrement ? this.getNextAddress() : this.manualAddress;
+        const address = this.autoIncrement ? this.getNextAddress() : this.data.recipe.dbBlockAddress + '.' + this.manualAddress;
 
         const entry = {
             address: address,

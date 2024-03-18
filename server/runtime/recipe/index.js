@@ -34,6 +34,21 @@ function init(_settings, log) {
     });
 }
 
+function setRecipeData(cmd, value){
+    return new Promise((resolve, reject) =>{
+        if(cmd === RecipeDataCmdType.SetUpRecipe){
+            if(value.recipeId !== undefined){
+                updateRecipe(value)
+            }else{
+                setRecipe(value);
+            }
+        }else if(cmd === RecipeDataCmdType.DelRecipe){
+                removeRecipeFromDatabase(value);
+        }
+    })
+}
+
+
 function setRecipe(recipeData) {
     return new Promise((resolve, reject) => {
         recipeData.creationTime = Date.now();
@@ -54,6 +69,19 @@ function setRecipe(recipeData) {
 function getRecipes() {
     return new Promise((resolve, reject) => {
         recstorage.getRecipes()
+            .then(recipes => {
+                resolve(recipes);
+            })
+            .catch(error => {
+                logger.error()
+                reject(error);
+            });
+    });
+}
+
+function getActiveRecipes(query){
+    return new Promise((resolve, reject) => {
+        recstorage.getActiveRecipesByDeviceType(query)
             .then(recipes => {
                 resolve(recipes);
             })
@@ -94,16 +122,17 @@ function removeRecipeFromDatabase(recipeId) {
 }
 
 
-function uploadRecipeToRun(recipeId){
 
-
-
+const RecipeDataCmdType = {
+    SetUpRecipe: 'set-up-recpie',
+    DelRecipe: 'del-recipe',
 }
-
 
 module.exports = {
     init: init,
     getRecipes: getRecipes,
+    setRecipeData: setRecipeData,
     updateRecipe: updateRecipe,
-    setRecipe: setRecipe
+    setRecipe: setRecipe,
+    getActiveRecipes: getActiveRecipes
 };

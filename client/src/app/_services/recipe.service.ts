@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { RecipeDataCmdType } from '../_models/recipe';
 
 import { EndPointApi } from '../_helpers/endpointapi';
 import { Recipe } from '../_models/recipe';
@@ -18,46 +19,80 @@ export class RecipeService{
                 private toastr: ToastrService) {
 
     }
-    getRecipes(recipe: any): Observable<any> {
+    getRecipes(): Observable<any> {
         let header = new HttpHeaders({ 'Content-Type': 'application/json' });
-        let params = recipe;
-        return this.http.get<any>(this.endPointConfig + '/api/recipes', { headers: header, params: params });
+        return this.http.get<any>(this.endPointConfig + '/api/recipes', { headers: header});
     }
 
-    setRecipe(recipe: Recipe) {
-        return new Observable((observer) => {
+
+    getActiveRecipes(query: any): Observable<any> {
+        let header = new HttpHeaders({ 'Content-Type': 'application/json' });
+        const options = query ?
+        { params: new HttpParams().set('deviceType', query) } : {};
+        return this.http.get<any>(this.endPointConfig + '/api/activerecipes', options);
+    }
+
+
+    setOrUpdateRecipe(recipe: Recipe) {
             if (environment.serverEnabled) {
                 let header = new HttpHeaders({ 'Content-Type': 'application/json' });
-                this.http.post<any>(this.endPointConfig + '/api/recipe', { headers: header, params: recipe }).subscribe(result => {
-                    observer.next();
+                let params = {cmd: RecipeDataCmdType.SetUpRecipe, data: recipe};
+                this.http.post<any>(this.endPointConfig + '/api/recipe', params, { headers: header}).subscribe(result => {
                 }, err => {
                     console.error(err);
                     this.notifySaveError();
-                    observer.error(err);
                 });
-            } else {
-                observer.next();
-            }
-        });
+            } 
     }
 
+    // setOrUpdateRecipe(recipe: Recipe) {
+    //     return new Observable((observer) => {
+    //         if (environment.serverEnabled) {
+    //             let header = new HttpHeaders({ 'Content-Type': 'application/json' });
+    //             let params = {cmd: RecipeDataCmdType.SetUpRecipe, data: recipe};
+    //             this.http.post<any>(this.endPointConfig + '/api/recipe', params, { headers: header}).subscribe(result => {
+    //                 observer.next();
+    //             }, err => {
+    //                 console.error(err);
+    //                 this.notifySaveError();
+    //                 observer.error(err);
+    //             });
+    //         } else {
+    //             observer.next();
+    //         }
+    //     });
+    // }
 
-    removeRecipe(recipe: Recipe) {
-        return new Observable((observer) => {
+
+    removeRecipe(recipeId: String) {
             if (environment.serverEnabled) {
                 let header = new HttpHeaders({ 'Content-Type': 'application/json' });
-                this.http.delete<any>(this.endPointConfig + '/api/recipes', { headers: header, params: {param: recipe.recipeId} }).subscribe(result => {
-                    observer.next();
+                let params = { cmd: RecipeDataCmdType.DelRecipe, data: recipeId };
+                this.http.post<any>(this.endPointConfig + '/api/recipe', params, { headers: header}).subscribe(result => {
                 }, err => {
                     console.error(err);
                     this.notifySaveError();
-                    observer.error(err);
                 });
-            } else {
-                observer.next();
-            }
-        });
+            } 
     }
+
+    // removeRecipe(recipeId: String) {
+    //     return new Observable((observer) => {
+    //         if (environment.serverEnabled) {
+    //             let header = new HttpHeaders({ 'Content-Type': 'application/json' });
+    //             let params = { cmd: RecipeDataCmdType.DelRecipe, data: recipeId };
+    //             this.http.post<any>(this.endPointConfig + '/api/recipe', params, { headers: header}).subscribe(result => {
+    //                 observer.next();
+    //             }, err => {
+    //                 console.error(err);
+    //                 this.notifySaveError();
+    //                 observer.error(err);
+    //             });
+    //         } else {
+    //             observer.next();
+    //         }
+    //     });
+    // }
 
     private notifySaveError() {
         let msg = '';

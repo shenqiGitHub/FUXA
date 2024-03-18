@@ -370,17 +370,18 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
         this.uploadRecipe(device);
     }
 
+
     private uploadRecipe(device: Device){
         let dialogRef = this.dialog.open(RecipeUploadComponent,
             {
                 panelClass: 'dialog-property',
                 data: {
-                    devices:this.devices,
-                    availableType: this.plugins,
+                    device: device,
+                    devices: this.devices,
                     projectService: this.projectService
                 },
                 position: { top: '60px' }
-            }           
+            }
             );
         dialogRef.afterClosed().subscribe(result => {
           if(result){

@@ -1,13 +1,15 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import {Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, Inject} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatDialogRef } from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import { AppService } from '../../_services/app.service';
 import { Device, DeviceConnectionStatusType } from './../../_models/device';
 import { Recipe } from '../../_models/recipe';
 import { RecipeService } from '../../_services/recipe.service';
+import { HmiService } from '../../_services/hmi.service';
+
 
 
 
@@ -46,14 +48,15 @@ export class RecipeUploadComponent implements OnInit, OnDestroy, AfterViewInit {
   devices = {};
   plugins = [];
 
-  
+
 
 
   constructor(
                 public dialogRef: MatDialogRef<RecipeUploadComponent>,
-                // public data: any,
+                private hmiService: HmiService,
                 private appService: AppService,
-                private recipeService: RecipeService
+                private recipeService: RecipeService,
+                @Inject(MAT_DIALOG_DATA) public data: any
                 ) {
   }
 
@@ -84,8 +87,8 @@ export class RecipeUploadComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private loadRecipes() {
       this.recipes = [];
-      let condition = new Recipe();
-      this.recipeService.getRecipes(condition).subscribe(result => {
+      let condition = {};
+      this.recipeService.getActiveRecipes(this.data.device.type).subscribe(result => {
         Object.values<Recipe>(result).forEach(
           r => {
            this.recipes.push(r);
@@ -96,13 +99,14 @@ export class RecipeUploadComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
-    onclickUpload(recipe : Recipe){
-      console.info(recipe);
+    onclickUpload(recipe: Recipe){
+        console.info(recipe);
+        this.upload(this.data.device.id, recipe);
     }
 
 
-    public upload(recipe: Recipe){
-      recipe.detail;
+    public upload(deviceId: string, recipe: Recipe){
+        this.hmiService.putRecipeValue(deviceId, recipe);
     }
 
     onNoClick(): void {
