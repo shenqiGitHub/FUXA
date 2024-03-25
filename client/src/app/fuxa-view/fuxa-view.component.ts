@@ -12,19 +12,23 @@ import {
     ViewChild,
     ViewContainerRef
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
 
-import { Event, GaugeEvent, GaugeEventActionType, GaugeSettings, GaugeProperty, GaugeEventType, GaugeRangeProperty, GaugeStatus, Hmi, View, ViewType, Variable, ZoomModeType } from '../_models/hmi';
+import { Event, GaugeEvent, GaugeEventActionType, GaugeSettings, GaugeProperty, GaugeEventType, GaugeRangeProperty, GaugeStatus, Hmi, View, ViewType, Variable, ZoomModeType, InputOptionType } from '../_models/hmi';
 import { GaugesManager } from '../gauges/gauges.component';
 import { Utils } from '../_helpers/utils';
-import { ScriptParam, SCRIPT_PARAMS_MAP } from '../_models/script';
+import { ScriptParam, SCRIPT_PARAMS_MAP, ScriptParamType } from '../_models/script';
 import { ScriptService } from '../_services/script.service';
 import { HtmlInputComponent } from '../gauges/controls/html-input/html-input.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectService } from '../_services/project.service';
 import { NgxTouchKeyboardDirective } from '../framework/ngx-touch-keyboard/ngx-touch-keyboard.directive';
 import { HmiService } from '../_services/hmi.service';
+import { HtmlSelectComponent } from '../gauges/controls/html-select/html-select.component';
+import { FuxaViewDialogComponent, FuxaViewDialogData } from './fuxa-view-dialog/fuxa-view-dialog.component';
+import {DialogPosition, MatDialog} from '@angular/material/dialog';
+import { WebcamPlayerDialogComponent, WebcamPlayerDialogData } from '../gui-helpers/webcam-player/webcam-player-dialog/webcam-player-dialog.component';
 
 declare var SVG: any;
 
@@ -51,21 +55,21 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('touchKeyboard', {static: false}) touchKeyboard: NgxTouchKeyboardDirective;
 
     eventRunScript = Utils.getEnumKey(GaugeEventActionType, GaugeEventActionType.onRunScript);
+    scriptParameterValue = Utils.getEnumKey(ScriptParamType, ScriptParamType.value);
 
     cards: CardModel[] = [];
     iframes: CardModel[] = [];
-    dialog: DialogModalModel;
     mapGaugeStatus = {};
     inputDialog = { show: false, timer: null, x: 0, y: 0, target: null };
     gaugeInput = '';
     gaugeInputCurrent = '';
-
+    parent: FuxaViewComponent;
     cardViewType = Utils.getEnumKey(ViewType, ViewType.cards);
 
     private subscriptionOnChange: Subscription;
     protected staticValues: any = {};
     protected plainVariableMapping: any = {};
-    private subscriptionLoad: Subscription;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private translateService: TranslateService,
@@ -74,7 +78,8 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
         private scriptService: ScriptService,
         private projectService: ProjectService,
         private hmiService: HmiService,
-        private resolver: ComponentFactoryResolver) {
+        private resolver: ComponentFactoryResolver,
+        private fuxaDialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -92,13 +97,15 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
     ngAfterViewInit() {
         this.loadHmi(this.view);
         /* check if already loaded */
-        if (this.projectService.getHmi()) {
-            this.projectService.initScheduledScripts();
-        } else {
-            this.subscriptionLoad = this.projectService.onLoadHmi.subscribe(
-                load => {this.projectService.initScheduledScripts();
-            });
-        }
+        // if (this.projectService.getHmi()) {
+        //     this.initScheduledScripts();
+        // } else {
+        //     this.projectService.onLoadHmi.pipe(
+        //         takeUntil(this.destroy$)
+        //     ).subscribe(() => {
+        //         this.initScheduledScripts();
+        //     });
+        // }
         try {
             this.gaugesManager.emitBindedSignals(this.id);
         } catch (err) {
@@ -108,10 +115,8 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnDestroy() {
         try {
-			if (this.subscriptionLoad) {
-				this.subscriptionLoad.unsubscribe();
-			}
-            this.projectService.clearScheduledScripts();
+            this.destroy$.next();
+            this.destroy$.complete();
             this.gaugesManager.unbindGauge(this.id);
             this.clearGaugeStatus();
             if (this.subscriptionOnChange) {
@@ -151,7 +156,10 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
      * load the svg content to show in browser, clear all binded to this view
      * @param view
      */
-    public loadHmi(view: View) {
+    public loadHmi(view: View, legacyProfile?: boolean) {
+        if (!this.hmi) {
+            this.hmi = this.projectService.getHmi();
+        }
         if (this.id) {
             try {
                 this.gaugesManager.unbindGauge(this.id);
@@ -171,7 +179,7 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
                 this.dataContainer.nativeElement.innerHTML = view.svgcontent.replace('<title>Layer 1</title>', '');
             }
-            if (view.profile.bkcolor && this.child) {
+            if (view.profile.bkcolor && (this.child || legacyProfile)) {
                 this.dataContainer.nativeElement.style.backgroundColor = view.profile.bkcolor;
             }
         }
@@ -202,13 +210,13 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                     continue;
                 }
                 try {
-                    let gauge = this.gaugesManager.initElementAdded(items[key], this.resolver, this.viewContainerRef, true);
+                    let gauge = this.gaugesManager.initElementAdded(items[key], this.resolver, this.viewContainerRef, true, this);
                     this.gaugesManager.bindGauge(gauge, this.id, items[key],
                         (gaToBindMouseEvents) => {
                             this.onBindMouseEvents(gaToBindMouseEvents);
                         },
-                        (gatobindhtmlevent) => {
-                            this.onBindHtmlEvent(gatobindhtmlevent);
+                        (gaToBindHtmlEvent) => {
+                            this.onBindHtmlEvent(gaToBindHtmlEvent);
                         });
                     if (items[key].property) {
                         let gaugeSetting = items[key];
@@ -233,7 +241,7 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                         }
                     }
                 } catch (err) {
-                    console.error('loadWatch: ' + err);
+                    console.error('loadWatch: ' + key, err);
                 }
             }
             if (!this.subscriptionOnChange) {
@@ -249,7 +257,7 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 });
             }
             // set subscription to server
-            this.hmiService.tagsSubscribe(this.gaugesManager.getBindedSignalsId());
+            this.hmiService.viewsTagsSubscribe(this.gaugesManager.getBindedSignalsId());
         }
     }
 
@@ -370,7 +378,7 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
      * @param ga
      */
     private onBindMouseEvents(ga: GaugeSettings) {
-        let self = this;
+        let self = this.parent || this;
         let svgele = FuxaViewComponent.getSvgElement(ga.id);
         if (svgele) {
             let clickEvents = self.gaugesManager.getBindMouseEvent(ga, GaugeEventType.click);
@@ -420,7 +428,9 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 self.openWindow(ga.id, ev, events[i].actparam, events[i].actoptions);
             } else if (eventTypes.indexOf(GaugeEventActionType.onclose) === actindex) {
                 self.onClose(ev);
-            } else if (events[i].action === this.eventRunScript) {
+            } else if (eventTypes.indexOf(GaugeEventActionType.onMonitor) === actindex) {
+                self.onMonitor(ga, ev, events[i].actparam, events[i].actoptions);
+            }else if (events[i].action === this.eventRunScript) {
                 self.onRunScript(events[i]);
             }
         }
@@ -450,20 +460,27 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private onBindHtmlEvent(htmlevent: Event) {
         let self = this;
         // let htmlevent = this.getHtmlElement(ga.id);
+        if (this.hmi.layout?.inputdialog === 'keyboardFullScreen') {
+            this.touchKeyboard.ngxTouchKeyboardFullScreen = true;
+        }
         if (htmlevent.type === 'key-enter') {
             htmlevent.dom.onkeydown = function(ev) {
                 if (ev.key == 'Enter') {
                     htmlevent.dbg = 'key pressed ' + htmlevent.dom.id + ' ' + htmlevent.dom.value;
                     htmlevent.id = htmlevent.dom.id;
                     htmlevent.value = htmlevent.dom.value;
-
                     let res = HtmlInputComponent.validateValue(htmlevent.dom.value, htmlevent.ga);
                     if(!res.valid){
                         self.setInputValidityMessage(res, htmlevent.dom);
                     }
-                    else{
+                    else {
+                        htmlevent.value = res.value;
                         self.gaugesManager.putEvent(htmlevent);
                         htmlevent.dom.blur();
+                    }
+                    if (htmlevent.ga.type === HtmlInputComponent.TypeTag) {
+                        const events = JSON.parse(JSON.stringify(HtmlInputComponent.getEvents(htmlevent.ga.property, GaugeEventType.enter)));
+                        self.eventForScript(events, htmlevent.value);
                     }
                 } else if (ev.key == 'Escape') {
                     htmlevent.dom.blur();
@@ -483,7 +500,7 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                         }
                         self.gaugeInputCurrent = htmlevent.dom.value;
                         document.body.appendChild(self.inputDialogRef.nativeElement);
-
+                        HtmlInputComponent.checkInputType(self.inputValueRef.nativeElement, htmlevent.ga.property?.options);
                         setTimeout(() => {
                             self.inputValueRef.nativeElement.focus();
                         }, 300);
@@ -492,14 +509,17 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
                 // Register events to remove and add unit on input focus and blur. We don'w want units to be part of input value during editing
                 // When input dialog is enabled, these event gets overridden (by binding of HtmlEvent) and are not called.
-                if (this.hmi.layout?.inputdialog === 'keyboard' && htmlevent.ga?.type === HtmlInputComponent.TypeTag) {
+                if (this.hmi.layout?.inputdialog.startsWith('keyboard') && htmlevent.ga?.type === HtmlInputComponent.TypeTag) {
                     htmlevent.dom.onfocus = function(ev) {
                         self.touchKeyboard.closePanel();
                         let eleRef = new ElementRef(htmlevent.dom);
-                        if (htmlevent.ga?.property?.options?.numeric) {
+                        if (htmlevent.ga?.property?.options?.numeric || htmlevent.ga?.property?.options?.type === InputOptionType.number) {
                             eleRef.nativeElement.inputMode = 'decimal';
                         }
-                        self.touchKeyboard.openPanel(eleRef);
+                        if (htmlevent.ga?.property?.options?.type !== InputOptionType.datetime && htmlevent.ga?.property?.options?.type !== InputOptionType.date &&
+                            htmlevent.ga?.property?.options?.type !== InputOptionType.time) {
+                            self.touchKeyboard.openPanel(eleRef);
+                        }
                         // if(htmlevent.ga.property){
                         //     let unit = HtmlInputComponent.getUnit(htmlevent.ga.property, new GaugeStatus());
                         //     if(unit && htmlevent.dom.value.endsWith(unit)){
@@ -517,7 +537,9 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                     let svgeles = FuxaViewComponent.getSvgElements(htmlevent.ga.id);
 
                     if (variables.length && svgeles.length) {
-                        self.gaugesManager.processValue(htmlevent.ga, svgeles[0], variables[0], new GaugeStatus());
+                        if (htmlevent.ga?.type !== HtmlInputComponent.TypeTag && !HtmlInputComponent.InputDateTimeType.includes(htmlevent.ga?.property.options?.type)) {
+                            self.gaugesManager.processValue(htmlevent.ga, svgeles[0], variables[0], new GaugeStatus());
+                        }
                     }
                     // Remove any error message when input is blured
                     htmlevent.dom.setCustomValidity('');
@@ -534,8 +556,26 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 htmlevent.id = htmlevent.dom.id;
                 htmlevent.value = htmlevent.dom.value;
                 self.gaugesManager.putEvent(htmlevent);
+                if (htmlevent.ga.type === HtmlSelectComponent.TypeTag) {
+                    const events = JSON.parse(JSON.stringify(HtmlSelectComponent.getEvents(htmlevent.ga.property, GaugeEventType.select)));
+                    self.eventForScript(events, htmlevent.value);
+                }
             };
         }
+    }
+
+    private eventForScript(events: GaugeEvent[], value: any) {
+        events.forEach(ev => {
+            if (value) {
+                let parameters = <ScriptParam[]>ev.actoptions[SCRIPT_PARAMS_MAP];
+                parameters.forEach(param => {
+                    if (param.type === this.scriptParameterValue && !param.value) {
+                        param.value = value;
+                    }
+                });
+            }
+            this.onRunScript(ev);
+        });
     }
 
     private setInputDialogStyle(element: any, style: string, sourceBound: DOMRect) {
@@ -591,22 +631,27 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     openDialog(event, viewref: string, options: any = {}) {
-        let view: View = this.getView(viewref);
-        if (!view) {
-            return;
-        }
-        this.dialog = new DialogModalModel(viewref);
-        this.dialog.width = view.profile.width;
-        this.dialog.height = view.profile.height + 26;
-        this.dialog.view = view;
-        this.dialog.bkcolor = 'trasparent';
-        this.dialog.variablesMapping = options.variablesMapping;
-        if (view.profile.bkcolor) {
-            this.dialog.bkcolor = view.profile.bkcolor;
-        }
+        let dialogData = <FuxaViewDialogData>{
+            view: this.getView(viewref),
+            bkColor: 'trasparent',
+            variablesMapping: options.variablesMapping,
+            disableDefaultClose: options.hideClose,
+            gaugesManager: this.gaugesManager
+        };
+        let dialogRef = this.fuxaDialog.open(FuxaViewDialogComponent, {
+            panelClass: 'fuxa-dialog-property',
+            disableClose: true,
+            data: dialogData,
+            autoFocus: false,
+            position: { top: '60px' }
+        });
+        dialogRef.afterClosed().subscribe();
     }
 
     onOpenCard(id: string, event, viewref: string, options: any = {}) {
+        if (options.singleCard) {
+            this.cards = [];
+        }
         let view: View = this.getView(viewref);
         if (!view) {
             return;
@@ -631,6 +676,7 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
         card.height = view.profile.height;
         card.view = view;
         card.variablesMapping = options.variablesMapping;
+        card.disableDefaultClose = options.hideClose;
         if (this.parentcards) {
             this.parentcards.push(card);
         } else {
@@ -686,10 +732,6 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cards.splice(this.cards.indexOf(card), 1);
     }
 
-    onCloseDialog() {
-        delete this.dialog;
-    }
-
     private onClose($event) {
         if (this.onclose) {
             this.onclose.emit($event);
@@ -733,6 +775,26 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 console.error(err);
             });
         }
+    }
+
+    onMonitor(gaugeSettings: GaugeSettings, event: any, viewref: string, options: any = {}) {
+        let dialogData = <WebcamPlayerDialogData>{
+            view: this.getView(viewref),
+            bkColor: 'transparent',
+            gaugesManager: this.gaugesManager,
+            ga: gaugeSettings
+        };
+        let pos = <DialogPosition> {
+            top: event.layerY + 30 + 'px',
+            left: event.layerX + 10 + 'px'
+        };
+        let dialogRef = this.fuxaDialog.open(WebcamPlayerDialogComponent, {
+            panelClass: 'fuxa-dialog-property',
+            disableClose: false,
+            data: dialogData,
+            position: pos
+        });
+        dialogRef.afterClosed().subscribe();
     }
 
     getCardHeight(height) {
@@ -799,16 +861,16 @@ export class FuxaViewComponent implements OnInit, AfterViewInit, OnDestroy {
     onOkClick(evintput) {
         if (this.inputDialog.target.dom) {
             let res = HtmlInputComponent.validateValue(evintput, this.inputDialog.target.ga);
-            if(!res.valid){
+            if(!res.valid) {
                 this.setInputValidityMessage(res, this.inputValueRef.nativeElement);
             }
-            else{
+            else {
                 this.inputValueRef.nativeElement.setCustomValidity('');
                 this.inputDialog.target.dom.value = evintput;
                 this.inputDialog.target.dbg = 'key pressed ' + this.inputDialog.target.dom.id + ' ' + this.inputDialog.target.dom.value;
                 this.inputDialog.target.id = this.inputDialog.target.dom.id;
                 this.inputDialog.target.value = this.inputDialog.target.dom.value;
-                this.gaugesManager.putEvent(this.inputDialog.target);
+                this.gaugesManager.putEvent({...this.inputDialog.target, value: res.value});
             }
         }
     }
@@ -828,6 +890,8 @@ export class CardModel {
     public variablesMapping: any = [];
     public view: View;
 
+    disableDefaultClose: boolean;
+
     constructor(id: string) {
         this.id = id;
     }
@@ -842,6 +906,8 @@ export class DialogModalModel {
     public bkcolor: string;
     public view: View;
     public variablesMapping: any = [];
+
+    disableDefaultClose: boolean;
 
     constructor(id: string) {
         this.id = id;

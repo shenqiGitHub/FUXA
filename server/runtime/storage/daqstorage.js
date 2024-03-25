@@ -6,8 +6,10 @@
 
 const fs = require('fs');
 const path = require('path');
-var SqliteDB = require("./sqlite");
-var InfluxDB = require("./influxdb");
+const SqliteDB = require("./sqlite");
+const InfluxDB = require("./influxdb");
+const TDengine  =require("./tdengine");
+const CurrentStorage = require("./sqlite/currentstorage");
 // var DaqNode = require('./daqnode');
 var calculator = require('./calculator');
 var utils = require('../utils');
@@ -17,12 +19,13 @@ var daqStoreType;
 var settings;
 var logger;
 var daqDB = {};                 // list of daqDB node: SQlite one pro device, influxDB only one
-var timeSerieDB;
+var currentStorateDB;
 
 function init(_settings, _log) {
     settings = _settings;
     logger = _log;
     logger.info("daqstorage: init successful!", true);
+    currentStorateDB = CurrentStorage.create(_settings, _log);
 }
 
 function reset() {
@@ -37,14 +40,16 @@ function reset() {
 function addDaqNode(_id, fncgetprop) {
     var id = _id;
     const dbType = _getDbType();
-    if (dbType === DaqStoreTypeEnum.influxDB || dbType === DaqStoreTypeEnum.influxDB18) {
+    if (dbType === DaqStoreTypeEnum.influxDB || dbType === DaqStoreTypeEnum.influxDB18 || dbType === DaqStoreTypeEnum.TDengine) {
         id = dbType;
     }
     if (!daqDB[id]) {
         if (id === DaqStoreTypeEnum.influxDB || id === DaqStoreTypeEnum.influxDB18) {
-            daqDB[id] = InfluxDB.create(settings, logger);
+            daqDB[id] = InfluxDB.create(settings, logger, currentStorateDB);
+        } else if(id === DaqStoreTypeEnum.TDengine){
+            daqDB[id] = TDengine.create(settings, logger, currentStorateDB);
         } else {
-            daqDB[id] = SqliteDB.create(settings, logger, id);
+            daqDB[id] = SqliteDB.create(settings, logger, id, currentStorateDB);
         }
     }
     return daqDB[id].setCall(fncgetprop);
@@ -138,6 +143,10 @@ function checkRetention() {
     });
 }
 
+function getCurrentStorageFnc() {
+    return currentStorateDB.getValuesByDeviceId;
+}
+
 function _getDaqNode(tagid) {
     var nodes = Object.values(daqDB);
     for (var i = 0; i < nodes.length; i++) {
@@ -148,7 +157,7 @@ function _getDaqNode(tagid) {
 }
 
 function _getDbType() {
-    if (settings.daqstore && settings.daqstore) {
+    if (settings.daqstore && settings.daqstore.type) {
         return settings.daqstore.type;
     }
     return DaqStoreTypeEnum.SQlite;
@@ -158,6 +167,7 @@ var DaqStoreTypeEnum = {
     SQlite: 'SQlite',
     influxDB: 'influxDB',
     influxDB18: 'influxDB18',
+    TDengine: 'TDengine',
 }
 
 function _getValue(value) {
@@ -174,4 +184,5 @@ module.exports = {
     getNodeValues: getNodeValues,
     getNodesValues: getNodesValues,
     checkRetention: checkRetention,
+    getCurrentStorageFnc: getCurrentStorageFnc,
 };

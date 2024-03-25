@@ -113,8 +113,8 @@ function S7client(_data, _logger, _events) {
                     let varsValueChanged = _updateVarsValue(result);
                     lastTimestampValue = new Date().getTime();
                     _emitValues(varsValue);
-                    if (this.addDaq) {
-                        this.addDaq(varsValueChanged, data.name);
+                    if (this.addDaq && !utils.isEmptyObject(varsValueChanged)) {
+                        this.addDaq(varsValueChanged, data.name, data.id);
                     }
                 } else {
                     // console.error('not');
@@ -228,7 +228,7 @@ function S7client(_data, _logger, _events) {
             value = deviceUtils.tagRawCalculator(value, data.tags[sigid]);
             item.value = value;
             _writeVars([item], (item instanceof DbItem)).then(result => {
-                logger.info(`'${data.name}' setValue(${sigid}, ${value})`, true);
+                logger.info(`'${data.name}' setValue(${sigid}, ${value})`, true, true);
             }, reason => {
                 if (reason && reason.stack) {
                     logger.error(`'${data.name}' _writeVars error! ${reason.stack}`);
@@ -236,7 +236,9 @@ function S7client(_data, _logger, _events) {
                     logger.error(`'${data.name}' _writeVars error! ${reason}`);
                 }
             });
+            return true;
         }
+        return false;
     }
 
     this.setValueByRecipe = function(data){
@@ -281,6 +283,24 @@ function S7client(_data, _logger, _events) {
      */
     this.lastReadTimestamp = () => {
         return lastTimestampValue;
+    }
+
+    /**
+     * Return the Daq settings of Tag
+     * @returns 
+     */
+    this.getTagDaqSettings = (tagId) => {
+        return data.tags[tagId] ? data.tags[tagId].daq : null;
+    }
+
+    /**
+     * Set Daq settings of Tag
+     * @returns 
+     */
+    this.setTagDaqSettings = (tagId, settings) => {
+        if (data.tags[tagId]) {
+            utils.mergeObjectsValues(data.tags[tagId].daq, settings);
+        }
     }
 
     /**

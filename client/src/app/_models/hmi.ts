@@ -50,6 +50,8 @@ export class LayoutSettings {
     theme = '';
     /** Show login by start */
     loginonstart?: boolean = false;
+    /** Overlay color for login modal */
+    loginoverlaycolor?: LoginOverlayColorType = LoginOverlayColorType.none;
     /** Show connection error toast */
     show_connection_error? = true;
 }
@@ -71,6 +73,12 @@ export class NavigationSettings {
         this.mode = Object.keys(NaviModeType).find(key => NaviModeType[key] === NaviModeType.over) as NaviModeType;
         this.type = Object.keys(NaviItemType).find(key => NaviItemType[key] === NaviItemType.block) as NaviItemType;
     }
+}
+
+export enum LoginOverlayColorType {
+    none = 'none',
+    black = 'black',
+    white = 'white',
 }
 
 export enum NaviModeType {
@@ -106,6 +114,7 @@ export class HeaderSettings {
     fontSize = 13;
     items: HeaderItem[];
     itemsAnchor: AnchorType = 'left';
+    loginInfo: LoginInfoType;
 }
 
 export interface HeaderItem {
@@ -121,6 +130,8 @@ export interface HeaderItem {
     status: GaugeStatus;
     element: HTMLElement;
 }
+
+export type LoginInfoType = 'nothing' | 'username' | 'fullname' | 'both';
 
 export type HeaderItemType = 'button' | 'label' | 'image';
 
@@ -142,6 +153,7 @@ export enum InputModeType {
     false = 'item.inputmode-disabled',
     true = 'item.inputmode-enabled',
     keyboard = 'item.inputmode-keyboard',
+    keyboardFullScreen = 'item.inputmode-keyboard-full-screen',
 }
 
 export enum HeaderBarModeType {
@@ -182,7 +194,30 @@ export interface InputOptionsProperty {
     numeric?: boolean;
     min?: number;
     max?: number;
+    type?: InputOptionType;
+    timeformat?: InputTimeFormatType;
+    convertion?: InputConvertionType;
 }
+
+export enum InputOptionType {
+    number = 'number',
+    text = 'text',
+    date = 'date',
+    time = 'time',
+    datetime = 'datetime'
+}
+
+export enum InputTimeFormatType {
+    normal = 'normal',
+    seconds = 'seconds',
+    milliseconds = 'milliseconds',
+}
+
+export enum InputConvertionType {
+    milliseconds = 'milliseconds',
+    string = 'string',
+}
+
 export interface IPropertyVariable {
     /** Tag id */
     variableId: string;
@@ -209,7 +244,8 @@ export enum GaugeActionsType {
     anticlockwise = 'shapes.action-anticlockwise',
     downup = 'shapes.action-downup',
     rotate = 'shapes.action-rotate',
-    move = 'shapes.action-move'
+    move = 'shapes.action-move',
+    monitor = 'shapes.action-monitor',
 }
 
 export class GaugeAction {
@@ -266,6 +302,8 @@ export enum GaugeEventType {
     click = 'shapes.event-click',
     mousedown = 'shapes.event-mousedown',
     mouseup = 'shapes.event-mouseup',
+    enter = 'shapes.event-enter',
+    select = 'shapes.event-select',
 }
 
 export enum GaugeEventActionType {
@@ -279,6 +317,7 @@ export enum GaugeEventActionType {
     onSetInput = 'shapes.event-onsetinput',
     onclose = 'shapes.event-onclose',
     onRunScript = 'shapes.event-onrunscript',
+    onMonitor = 'shapes.event-onmonitor',
 }
 
 export enum GaugeEventSetValueType {
@@ -311,6 +350,19 @@ export interface GaugeGraphProperty {
 
 export interface GaugeIframeProperty {
     address: string;
+    variableId: string;
+}
+
+export interface GaugePanelProperty {
+    viewName: string;
+    variableId: string;
+    scaleMode: PanelPropertyScaleModeType;
+}
+
+export enum PanelPropertyScaleModeType {
+    none = 'none',
+    contain = 'contain',
+    stretch = 'stretch'
 }
 
 export interface GaugeTableProperty {

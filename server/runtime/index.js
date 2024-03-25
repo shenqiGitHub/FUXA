@@ -92,7 +92,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
         logger.info(`socket.io client connected`);        
         socket.tagsClientSubscriptions = [];
         // check authorizations
-        if (settings.secureEnabled) {
+        if (settings.secureEnabled && !settings.secureOnlyEditor) {
             const token = socket.handshake.query.token;
             if (!token || token === 'null') {
                 socket.disconnect();
@@ -145,7 +145,6 @@ function init(_io, _api, _settings, _log, eventsMain) {
         // client ask device values
         socket.on(Events.IoEventTypes.DEVICE_VALUES, (message) => {
             try {
-                
                 if (message === 'get') {
                     var adevs = devices.getDevicesValues();
                     for (var id in adevs) {
@@ -153,8 +152,8 @@ function init(_io, _api, _settings, _log, eventsMain) {
                     }
                 } else if (message.cmd === 'set' && message.var) {
                     devices.setDeviceValue(message.var.source, message.var.id, message.var.value, message.fnc);
-                    logger.info(`${Events.IoEventTypes.DEVICE_VALUES}: ${message.var.source} ${message.var.id} = ${message.var.value}`);
-                } 
+                    // logger.info(`${Events.IoEventTypes.DEVICE_VALUES}: ${message.var.source} ${message.var.id} = ${message.var.value}`);
+                }
             } catch (err) {
                 logger.error(`${Events.IoEventTypes.DEVICE_VALUES}: ${err}`);
             }
@@ -302,6 +301,13 @@ function init(_io, _api, _settings, _log, eventsMain) {
             try {
             } catch (err) {
                 logger.error(`${Events.IoEventTypes.DEVICE_TAGS_UNSUBSCRIBE}: ${err}`);
+            }
+        });
+        socket.on(Events.IoEventTypes.DEVICE_ENABLE, (message) => {
+            try {
+                devices.enableDevice(message.deviceName, message.enable);
+            } catch (err) {
+                logger.error(`${Events.IoEventTypes.DEVICE_ENABLE}: ${err}`);
             }
         });
         socket.on(Events.IoEventTypes.RECIPE_UPLOAD, (message) => {
