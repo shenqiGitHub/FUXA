@@ -12,10 +12,11 @@ var { InfluxDB, Point, flux } = require('@influxdata/influxdb-client');
 const VERSION_18_FLUX = '1.8-flux';
 const VERSION_20 = '2.0';
 
-function Influx(_settings, _log) {
+function Influx(_settings, _log, _currentStorate) {
 
     var settings = _settings;               // Application settings
     var logger = _log;                      // Application logger
+    var currentStorage = _currentStorate    // Database to set the last value (current)
     var status = InfluxDBStatusEnum.CLOSE;
 
 
@@ -38,10 +39,14 @@ function Influx(_settings, _log) {
                 // rejectUnauthorized: n.rejectUnauthorized,
                 token
             }
-            client = new InfluxDB(clientOptions);
-            writeApi = client.getWriteApi(settings.daqstore.organization, settings.daqstore.bucket, 's');
-            queryApi = client.getQueryApi(settings.daqstore.organization);
-            status = InfluxDBStatusEnum.OPEN;
+            try {
+                client = new InfluxDB(clientOptions);
+                writeApi = client.getWriteApi(settings.daqstore.organization, settings.daqstore.bucket, 's');
+                queryApi = client.getQueryApi(settings.daqstore.organization);
+                status = InfluxDBStatusEnum.OPEN;    
+            } catch (error) {
+                logger.error('influxdb-init failed! ' + error.message); 
+            }
         } else if (influxdbVersion === VERSION_18_FLUX) {
             try {
                 const parsedUrl = new URL(settings.daqstore.url);
@@ -88,12 +93,18 @@ function Influx(_settings, _log) {
         logger.error('influxdb-addDaqValue Not supported!');
     }
 
-    this.addDaqValues = function (tagsValues, deviceName) {
-        var dataToWrite = []
+    this.addDaqValues = function (tagsValues, deviceName, deviceId) {
+        var dataToWrite = [];
+        var dataToRestore = [];
         for (var tagid in tagsValues) {
             let tag = tagsValues[tagid];
-            if (!tag.daq || !tag.daq.enabled || utils.isNullOrUndefined(tag.value) || Number.isNaN(tag.value) ) {
-                continue;
+            if (!tag.daq || utils.isNullOrUndefined(tag.value) || Number.isNaN(tag.value)) {
+                if (tag.daq.restored) {
+                    dataToRestore.push({id: tag.id, deviceId: deviceId, value: tag.value});
+                }
+                if (!tag.daq.enabled) {
+                    continue;
+                }
             }
             if (influxdbVersion === VERSION_18_FLUX) {
                 const tags = {
@@ -112,7 +123,7 @@ function Influx(_settings, _log) {
             } else {
                 const point = new Point(tag.id)
                     .tag('id', tag.id)
-                    .tag('name', tag.name)
+                    .tag('name', tag.name || tag.tagref.name)
                     .tag('type', tag.type)
                     .timestamp(new Date(tag.timestamp || new Date().getTime()));
                 if (deviceName) {
@@ -128,6 +139,9 @@ function Influx(_settings, _log) {
         }
         if (dataToWrite.length) {
             writePoints(dataToWrite);
+        }
+        if (dataToRestore.length && currentStorage) {
+            currentStorage.setValues(dataToRestore);
         }
     }
 
@@ -197,6 +211,9 @@ function Influx(_settings, _log) {
                     setError(err);
                 });
             }
+            if (currentStorage) {
+                currentStorage.setValues(points);
+            }
         } catch (error) {
             logger.error(`influxdb-writePoints failed! ${error}`);
         }
@@ -212,8 +229,8 @@ function Influx(_settings, _log) {
 
 
 module.exports = {
-    create: function (data, logger) {
-        return new Influx(data, logger);
+    create: function (data, logger, currentStorate) {
+        return new Influx(data, logger, currentStorate);
     }
 };
 

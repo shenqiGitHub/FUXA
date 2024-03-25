@@ -83,7 +83,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
         logger.info(`socket.io client connected`);        
         socket.tagsClientSubscriptions = [];
         // check authorizations
-        if (settings.secureEnabled) {
+        if (settings.secureEnabled && !settings.secureOnlyEditor) {
             const token = socket.handshake.query.token;
             if (!token || token === 'null') {
                 socket.disconnect();
@@ -292,6 +292,13 @@ function init(_io, _api, _settings, _log, eventsMain) {
             try {
             } catch (err) {
                 logger.error(`${Events.IoEventTypes.DEVICE_TAGS_UNSUBSCRIBE}: ${err}`);
+            }
+        });
+        socket.on(Events.IoEventTypes.DEVICE_ENABLE, (message) => {
+            try {
+                devices.enableDevice(message.deviceName, message.enable);
+            } catch (err) {
+                logger.error(`${Events.IoEventTypes.DEVICE_ENABLE}: ${err}`);
             }
         });
     });

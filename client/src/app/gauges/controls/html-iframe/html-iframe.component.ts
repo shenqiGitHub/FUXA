@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { GaugeBaseComponent } from '../../gauge-base/gauge-base.component';
-import { GaugeSettings } from '../../../_models/hmi';
+import { GaugeSettings, Variable } from '../../../_models/hmi';
 import { Utils } from '../../../_helpers/utils';
 import { GaugeDialogType } from '../../gauge-property/gauge-property.component';
 
@@ -18,13 +18,37 @@ export class HtmlIframeComponent extends GaugeBaseComponent {
         super();
     }
 
+    static getSignals(pro: any) {
+        let res: string[] = [];
+        if (pro.variableId) {
+            res.push(pro.variableId);
+        }
+        return res;
+    }
+
     static getDialogType(): GaugeDialogType {
         return GaugeDialogType.Iframe;
+    }
+
+    static processValue(ga: GaugeSettings, svgele: any, sig: Variable) {
+        try {
+            if (sig.value && svgele?.node?.children?.length >= 1) {
+                const parentIframe = Utils.searchTreeStartWith(svgele.node, this.prefixD);
+                const iframe = parentIframe.querySelector('iframe');
+                const src = iframe.getAttribute('src');
+                if (src !== sig.value && Utils.isValidUrl(sig.value)) {
+                    iframe.setAttribute('src', sig.value);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     static initElement(gaugeSettings: GaugeSettings, isview: boolean) {
         let ele = document.getElementById(gaugeSettings.id);
         if (ele) {
+            ele?.setAttribute('data-name', gaugeSettings.name);
             let svgIframeContainer = Utils.searchTreeStartWith(ele, this.prefixD);
             if (svgIframeContainer) {
                 svgIframeContainer.innerHTML = '';
@@ -41,7 +65,11 @@ export class HtmlIframeComponent extends GaugeBaseComponent {
                 }
                 iframe.setAttribute('title', 'iframe');
                 if (gaugeSettings.property && gaugeSettings.property.address && isview) {
-                    iframe.setAttribute('src', gaugeSettings.property.address);
+                    if (Utils.isValidUrl(gaugeSettings.property.address)) {
+                        iframe.setAttribute('src', gaugeSettings.property.address);
+                    } else {
+                        console.error('IFRAME URL not valid');
+                    }
                 }
                 iframe.innerHTML = '&nbsp;';
                 svgIframeContainer.appendChild(iframe);

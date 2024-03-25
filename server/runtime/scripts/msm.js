@@ -9,6 +9,7 @@ const path = require('path');
 var Module = module.constructor;
 
 // const eventsIncludes = 'var events = require("../events").create();';
+const requireInclude = `const path = require('path');`;
 const eventsIncludes = 'var events; var id; var console = { log: function (msg) { if (events) events.emit(\'script-console\', { msg: msg, type: \'log\', id: id });}};';
 // const eventsIncludes = 'var events = require("../events").create();';// var console = { log: function (msg) { if (events) events.emit(\'script-console\', { msg: msg, type: \'log\' });}}';
 const initEvents = { name: 'init', code: 'events = _events; id = _id', parameters: [{ name: '_events' }, { name: '_id' }] };
@@ -48,7 +49,7 @@ function MyScriptsModule(_events, _logger) {
         if (result.module) {
             var paramsValue = _script.parameters.map(p => p.value);
             result.module[initEvents.name](events, _script.outputId);
-            result.module[_script.name](...paramsValue);
+            return result.module[_script.name](...paramsValue);
         }
     }
 
@@ -59,7 +60,7 @@ function MyScriptsModule(_events, _logger) {
                 _script = Object.values(scriptsMap).find(s => s.id === _script.id);
             }
             try {
-                scriptsModule[_script.name](...paramsValue);
+                return scriptsModule[_script.name](...paramsValue);
             } catch (err) {
                 console.error(err);
             }
@@ -73,6 +74,10 @@ function MyScriptsModule(_events, _logger) {
             }
             scriptsModule[_script.name]();
         }
+    }
+
+    this.runSysFunction = function (functionName, params) {
+        return global[functionName](...params);
     }
 
     this.getScript = function (_script) {
@@ -108,7 +113,7 @@ function MyScriptsModule(_events, _logger) {
             if (_includes) {
                 code = `${_includes}`;
             }
-            var code = `${code} ${functions} module.exports = { ${toexport} };`;
+            var code = `${requireInclude} ${code} ${functions} module.exports = { ${toexport} };`;
             var filename = path.resolve(__dirname, 'msm-scripts.js');
             result.module = _requireFromString(code, filename);
         } catch(ex) {

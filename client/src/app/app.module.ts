@@ -44,7 +44,7 @@ import { ScriptSchedulingComponent } from './scripts/script-scheduling/script-sc
 import { ScriptPermissionComponent } from './scripts/script-permission/script-permission.component';
 import { TextListComponent, DialogItemText } from './text-list/text-list.component';
 import { LabComponent } from './lab/lab.component';
-import { DeviceComponent, DeviceTagDialog } from './device/device.component';
+import { DeviceComponent } from './device/device.component';
 import { DevicePropertyComponent } from './device/device-property/device-property.component';
 import { TagPropertyComponent } from './device/tag-property/tag-property.component';
 import { TagOptionsComponent } from './device/tag-options/tag-options.component';
@@ -118,7 +118,7 @@ import { HtmlTableComponent } from './gauges/controls/html-table/html-table.comp
 import { HtmlSwitchComponent } from './gauges/controls/html-switch/html-switch.component';
 import { GaugeProgressComponent } from './gauges/controls/gauge-progress/gauge-progress.component';
 import { GaugeSemaphoreComponent } from './gauges/controls/gauge-semaphore/gauge-semaphore.component';
-import { UsersComponent, DialogUser } from './users/users.component';
+import { UsersComponent } from './users/users.component';
 import { LoginComponent } from './login/login.component';
 import { DialogUserInfo } from './home/home.component';
 import { ShapesComponent } from './gauges/shapes/shapes.component';
@@ -167,10 +167,27 @@ import { RcgiService } from './_services/rcgi/rcgi.service';
 import { ToastNotifierService } from './_services/toast-notifier.service';
 import { MyFileService } from './_services/my-file.service';
 import { TagsIdsConfigComponent } from './editor/tags-ids-config/tags-ids-config.component';
+import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions } from '@angular/material/tooltip';
+import { HtmlImageComponent } from './gauges/controls/html-image/html-image.component';
+import { NgxSchedulerComponent } from './gui-helpers/ngx-scheduler/ngx-scheduler.component';
+import { FlexDeviceTagComponent } from './gauges/gauge-property/flex-device-tag/flex-device-tag.component';
+import { PanelComponent } from './gauges/controls/panel/panel.component';
+import { PanelPropertyComponent } from './gauges/controls/panel/panel-property/panel-property.component';
+import { UserEditComponent } from './users/user-edit/user-edit.component';
+import { FuxaViewDialogComponent } from './fuxa-view/fuxa-view-dialog/fuxa-view-dialog.component';
+import { DeviceTagSelectionComponent } from './device/device-tag-selection/device-tag-selection.component';
+import { WebcamPlayerComponent } from './gui-helpers/webcam-player/webcam-player.component';
+import { WebcamPlayerDialogComponent } from './gui-helpers/webcam-player/webcam-player-dialog/webcam-player-dialog.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
+
+export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
+    showDelay: 1000,
+    hideDelay: 1000,
+    touchendHideDelay: 1000,
+};
 
 @NgModule({
     declarations: [
@@ -182,7 +199,7 @@ export function createTranslateLoader(http: HttpClient) {
         AppComponent,
         LabComponent,
         DeviceComponent,
-        DeviceTagDialog,
+        DeviceTagSelectionComponent,
         TagPropertyComponent,
         TagOptionsComponent,
         TopicPropertyComponent,
@@ -199,6 +216,7 @@ export function createTranslateLoader(http: HttpClient) {
         DialogTagName,
         DeviceMapComponent,
         FuxaViewComponent,
+        FuxaViewDialogComponent,
         DialogDocProperty,
         DialogDocName,
         DialogNewDoc,
@@ -214,6 +232,7 @@ export function createTranslateLoader(http: HttpClient) {
         HtmlChartComponent,
         HtmlGraphComponent,
         HtmlIframeComponent,
+        HtmlImageComponent,
         HtmlBagComponent,
         GaugeProgressComponent,
         GaugeSemaphoreComponent,
@@ -231,6 +250,7 @@ export function createTranslateLoader(http: HttpClient) {
         TesterComponent,
         TutorialComponent,
         FlexInputComponent,
+        FlexDeviceTagComponent,
         FlexAuthComponent,
         FlexHeadComponent,
         FlexEventComponent,
@@ -273,10 +293,11 @@ export function createTranslateLoader(http: HttpClient) {
         LogsViewComponent,
         NgxGaugeComponent,
         NgxNouisliderComponent,
+        NgxSchedulerComponent,
         DialogChartLine,
         DialogGraphSource,
         UsersComponent,
-        DialogUser,
+        UserEditComponent,
         LoginComponent,
         DialogUserInfo,
         ViewComponent,
@@ -298,7 +319,11 @@ export function createTranslateLoader(http: HttpClient) {
         ReportItemTextComponent,
         ReportItemTableComponent,
         ReportItemAlarmsComponent,
-        ReportItemChartComponent
+        ReportItemChartComponent,
+        PanelComponent,
+        PanelPropertyComponent,
+        WebcamPlayerComponent,
+        WebcamPlayerDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -363,7 +388,8 @@ export function createTranslateLoader(http: HttpClient) {
         Define,
         AuthGuard,
         ToastNotifierService,
-        MyFileService
+        MyFileService,
+        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: myCustomTooltipDefaults}
     ],
     bootstrap: [AppComponent]
 })

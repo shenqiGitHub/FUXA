@@ -14,6 +14,18 @@ export class Utils {
 
     static lineColor = ['#4484ef', '#ef0909', '#00b050', '#ffd04a', '#7030a0', '#a5a5a5', '#c0504d', '#000000'];
 
+    static svgTagToType = ['rect', 'line', 'path', 'circle', 'ellipse', 'text'];
+
+    static walkTree(elem, cbFn) {
+        if (elem && elem.nodeType == 1) {
+            cbFn(elem);
+            var i = elem.childNodes.length;
+            while (i--) {
+                this.walkTree(elem.childNodes.item(i), cbFn);
+            }
+        }
+    }
+
     static searchTreeStartWith(element, matchingStart) {
         if (element.id.startsWith(matchingStart)) {
             return element;
@@ -85,6 +97,9 @@ export class Utils {
 
     static getInTreeIdAndType(element: Element): any[] {
         let type = element.getAttribute('type');
+        if (!type && Utils.svgTagToType.includes(element.tagName.toLowerCase())) {
+            type = 'svg-ext-shapes-' + element.tagName.toLowerCase();
+        }
         let id = element.getAttribute('id');
         let result = [];
         if (id && type) {
@@ -220,6 +235,22 @@ export class Utils {
         }
         return value;
     }
+
+    /**
+     * check to convert to float or to number
+     * @param value
+     */
+    static toFloatOrNumber(value: any) {
+        let result = parseFloat(value);
+        if (Utils.isNullOrUndefined(result)) {
+            // maybe boolean
+            result = Number(value);
+        } else {
+            result = parseFloat(result.toFixed(5));
+        }
+        return result;
+    }
+
 
     static formatValue(value: string, format: string): string {
         try {
@@ -369,6 +400,28 @@ export class Utils {
         });
     };
 
+    static resizeViewExt = (selector: string, parentId: string, resize?: 'contain' | 'stretch' | 'none') => {
+        const parentElement = document.getElementById(parentId) as HTMLElement;
+        if (!parentElement) {
+            console.error(`resizeViewExt -> Parent element with ID '${parentId}' not found.`);
+            return;
+        }
+        const parentRect: DOMRect = parentElement.getBoundingClientRect();
+        const resizeType = resize ?? 'none';
+        parentElement.querySelectorAll(selector).forEach((scaled: any) => {
+            const ratioWidth = (parentRect?.width / scaled.offsetWidth);
+            const ratioHeight = (parentRect?.height / scaled.offsetHeight);
+            if (resizeType === 'contain') {
+                scaled.style.transform = 'scale(' + Math.min(ratioWidth, ratioHeight) + ')';
+            } else if (resizeType === 'stretch') {
+                scaled.style.transform = 'scale(' + ratioWidth + ', ' + ratioHeight + ')';
+            } else if (resizeType === 'none') {
+                scaled.style.transform = 'scale(1)';
+            }
+            scaled.style.transformOrigin = 'top left';
+        });
+    };
+
     /** Merge of array of object, the next overwrite the last */
     static mergeDeep(...objArray) {
         const result = {};
@@ -405,6 +458,68 @@ export class Utils {
         document.execCommand('copy');
         // Remove the textarea from the document
         document.body.removeChild(textarea);
+    }
+
+    static millisecondsToTime(milliseconds: number): { hours: number; minutes: number; seconds: number; milliseconds: number } {
+        const hours = Math.floor(milliseconds / 3600000);
+        milliseconds %= 3600000;
+
+        const minutes = Math.floor(milliseconds / 60000);
+        milliseconds %= 60000;
+
+        const seconds = Math.floor(milliseconds / 1000); // 1 secondo = 1000 millisecondi
+        milliseconds %= 1000;
+
+        return { hours, minutes, seconds, milliseconds };
+    }
+
+    static timeToString(time: { hours: number; minutes: number; seconds: number; milliseconds: number }, format: number): string {
+        function formatNumberWithLeadingZeros(number, length) {
+            return number.toString().padStart(length, '0');
+        }
+        let result = `${formatNumberWithLeadingZeros(time.hours, 2)}:${formatNumberWithLeadingZeros(time.minutes, 2)}`;
+        if (format) {
+            result += `:${formatNumberWithLeadingZeros(time.seconds, 2)}`;
+            if (format >= 1000) {
+                result += `.${formatNumberWithLeadingZeros(time.milliseconds, 3)}`;
+            }
+        }
+        return result;
+    }
+
+    static millisecondsToTimeString(milliseconds: number, format?: number): string {
+        return Utils.timeToString(Utils.millisecondsToTime(milliseconds), format);
+    }
+
+    static millisecondsToDateString(milliseconds: number, format?: number): string {
+        const dateObject = new Date(milliseconds);
+        const year = dateObject.getFullYear();
+        const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObject.getDate().toString().padStart(2, '0');
+        const hours = dateObject.getHours().toString().padStart(2, '0');
+        const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+        const seconds = dateObject.getSeconds().toString().padStart(2, '0');
+        const milli = dateObject.getMilliseconds().toString().padStart(3, '0');
+        let dateString = `${year}-${month}-${day}`;
+        if (format > 0) {
+            dateString += `T${hours}:${minutes}`;
+            if (format > 1) {
+                dateString += `:${seconds}`;
+                if (format > 100) {
+                    dateString += `.${milli}`;
+                }
+            }
+        }
+        return dateString;
+    }
+
+    static isValidUrl(url: string): boolean {
+        try {
+            new URL(url);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 }
 
