@@ -178,6 +178,7 @@ import { PanelPropertyComponent } from './gauges/controls/panel/panel-property/p
 import { UserEditComponent } from './users/user-edit/user-edit.component';
 import { FuxaViewDialogComponent } from './fuxa-view/fuxa-view-dialog/fuxa-view-dialog.component';
 import { DeviceTagSelectionComponent } from './device/device-tag-selection/device-tag-selection.component';
+import { MSEPlayerComponent } from './gui-helpers/webcam-player/mse-player/mse-player.component';
 import { WebcamPlayerComponent } from './gui-helpers/webcam-player/webcam-player.component';
 import { WebcamPlayerDialogComponent } from './gui-helpers/webcam-player/webcam-player-dialog/webcam-player-dialog.component';
 import { RecipeComponent, DialogRecipe } from './recipe/recipe.component';
@@ -327,8 +328,8 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         PanelComponent,
         PanelPropertyComponent,
         WebcamPlayerComponent,
-        WebcamPlayerDialogComponent
-        ReportItemChartComponent,
+        MSEPlayerComponent,
+        WebcamPlayerDialogComponent,
         RecipeComponent,
         DialogRecipe,
         RecipeUploadComponent,
@@ -398,9 +399,8 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         AuthGuard,
         ToastNotifierService,
         MyFileService,
+        DatePipe,
         {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: myCustomTooltipDefaults}
-        MyFileService,
-        DatePipe
     ],
     bootstrap: [AppComponent]
 })

@@ -83,7 +83,6 @@
                 <button *ngIf="!readonly" mat-icon-button (click)="onUploadRecipe(element)" class="remove" matTooltip="{{'device.upload-recipe' | translate}}">
                     <mat-icon>upload</mat-icon>
                 </button>
-                <button *ngIf="!readonly && !isServer(element)" mat-icon-button (click)="onEditDevice(element)" class="remove" matTooltip="{{'device.property-edit' | translate}}">
                 <button *ngIf="!readonly" mat-icon-button (click)="onEditDevice(element)" class="remove" matTooltip="{{'device.property-edit' | translate}}">
                     <mat-icon>edit</mat-icon>
                 </button>
