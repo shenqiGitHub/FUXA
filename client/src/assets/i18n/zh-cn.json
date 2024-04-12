@@ -314,6 +314,10 @@
     "iframe.property-address": "地址",
     "iframe.property-name": "名称",
 
+    "monitor.property-data": "数据",
+    "monitor.property-address": "地址",
+    "monitor.property-name": "名称",    
+
     "table.property-title": "数据表设置",
     "table.property-data": "数据",
     "table.property-date-last-range": "日期范围",
@@ -425,6 +429,7 @@
     "editor.controls-iframe-settings": "内嵌网页设置",
     "editor.controls-table": "表",
     "editor.controls-webcam": "监控",
+    "editor.controls-monitor-settings": "监控设置",
 
     "editor.layout-settings": "布局设置",
 

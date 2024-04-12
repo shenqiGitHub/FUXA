@@ -37,6 +37,7 @@ import { GaugeBaseComponent } from './gauge-base/gauge-base.component';
 import { HtmlImageComponent } from './controls/html-image/html-image.component';
 import { PanelComponent } from './controls/panel/panel.component';
 import { FuxaViewComponent } from '../fuxa-view/fuxa-view.component';
+import { HtmlMonitorComponent } from './controls/html-monitor/html-monitor.component';
 
 @Injectable()
 export class GaugesManager {
@@ -72,7 +73,7 @@ export class GaugesManager {
     static Gauges = [ValueComponent, HtmlInputComponent, HtmlButtonComponent, HtmlBagComponent,
         HtmlSelectComponent, HtmlChartComponent, GaugeProgressComponent, GaugeSemaphoreComponent, ShapesComponent, ProcEngComponent, ApeShapesComponent,
         PipeComponent, SliderComponent, HtmlSwitchComponent, HtmlGraphComponent, HtmlIframeComponent, HtmlTableComponent,
-        HtmlImageComponent, PanelComponent];
+        HtmlImageComponent, PanelComponent, HtmlMonitorComponent];
 
     constructor(private hmiService: HmiService,
         private winRef: WindowRef,
@@ -204,6 +205,11 @@ export class GaugesManager {
             let gauge = HtmlTableComponent.detectChange(ga, res, ref);
             this.setTablePropety(gauge, ga.property);
             this.mapGauges[ga.id] = gauge;
+        } else if (ga.type.startsWith(HtmlMonitorComponent.TypeTag)){
+            delete this.mapGauges[ga.id];
+            let gauge = HtmlMonitorComponent.detectChange(ga, res, ref);
+            this.mapGauges[ga.id] = gauge;
+
         }
         return false;
     }
@@ -717,6 +723,8 @@ export class GaugesManager {
             return 'output_';
         } else if (type.startsWith(HtmlTableComponent.TypeTag)) {
             return 'table_';
+        } else if (type.startsWith(HtmlMonitorComponent.TypeTag)) {
+            return 'monitor_';
         }
         return 'shape_';
     }
@@ -813,6 +821,12 @@ export class GaugesManager {
         } else if (ga.type.startsWith(PanelComponent.TypeTag)) {
             let gauge: FuxaViewComponent = PanelComponent.initElement(ga, res, ref, this, this.hmiService.hmi, isview, parent);
             this.mapGauges[ga.id] = gauge;
+            return gauge;
+        } else if (ga.type.startsWith(HtmlMonitorComponent.TypeTag)){
+            let gauge = HtmlMonitorComponent.initElement(ga, ref);
+            if (gauge) {
+                this.mapGauges[ga.id] = gauge;
+            }
             return gauge;
         } else {
             let ele = document.getElementById(ga.id);

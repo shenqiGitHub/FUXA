@@ -31,6 +31,9 @@
         <div *ngSwitchCase="gaugeDialogType.Panel">
             <app-panel-property [data]="gaugeDialog.data" [reload]="reloadGaugeDialog" (onPropChanged)="onGaugeDialogChanged($event)"></app-panel-property>
         </div>
+        <div *ngSwitchCase="gaugeDialogType.Monitor">
+            <app-monitor-property [data]="gaugeDialog.data" [reload]="reloadGaugeDialog" (onPropChanged)="onGaugeDialogChanged($event)"></app-monitor-property>
+        </div>
     </div>
 </mat-drawer>
 <div id="svg_editor_container">
@@ -202,7 +205,11 @@
                             <div class="svg-tool-button" matTooltip="{{'editor.controls-panel' | translate}}" [ngClass]="{'svg-tool-active': isModeActive('own_ctrl-panel')}"
                                 (click)="setMode('own_ctrl-panel')">
                                 <span class="material-icon-tool material-icons" style="font-size: 25px;">web_asset</span>
-                            </div>                            
+                            </div>
+                            <div class="svg-tool-button" matTooltip="{{'editor.controls-monitor' | translate}}" [ngClass]="{'svg-tool-active': isModeActive('own_ctrl-monitor')}"
+                                (click)="setMode('own_ctrl-monitor')">
+                                <span class="material-icon-tool material-icons">videocam</span>
+                            </div>                                                        
                         </div>
                     </mat-expansion-panel>
                     <!-- SHAPES -->

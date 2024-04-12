@@ -339,6 +339,10 @@
     "iframe.property-address": "Adresse",
     "iframe.property-name": "Name",
 
+    "monitor.property-data": "Daten",
+    "monitor.property-address": "Adresse",
+    "monitor.property-name": "Name",
+
     "table.property-title": "Einstellungen der Datentabelle",
     "table.property-data": "Daten",
     "table.property-date-last-range": "Datumsbereich",
@@ -449,6 +453,7 @@
     "editor.controls-iframe": "Iframe",
     "editor.controls-iframe-settings": "Iframe-Einstellungen",
     "editor.controls-table": "Tabelle",
+    "editor.controls-monitor-settings": "Monitor",
     "editor.header-item-settings": "Kopfzeilen-Element Einstellungen",
 
     "editor.layout-settings": "Layout-Einstellungen",

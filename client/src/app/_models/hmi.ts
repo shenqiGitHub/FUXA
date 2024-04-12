@@ -359,6 +359,11 @@ export interface GaugePanelProperty {
     scaleMode: PanelPropertyScaleModeType;
 }
 
+export interface GaugeMonitorProperty {
+    address: string;
+    variableId: string;
+}
+
 export enum PanelPropertyScaleModeType {
     none = 'none',
     contain = 'contain',

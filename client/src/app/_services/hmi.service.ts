@@ -12,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService, UserProfile } from './auth.service';
-import {Recipe} from "../_models/recipe";
+import { Recipe } from '../_models/recipe';
 
 @Injectable()
 export class HmiService {

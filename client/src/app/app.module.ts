@@ -183,6 +183,9 @@ import { WebcamPlayerComponent } from './gui-helpers/webcam-player/webcam-player
 import { WebcamPlayerDialogComponent } from './gui-helpers/webcam-player/webcam-player-dialog/webcam-player-dialog.component';
 import { RecipeComponent, DialogRecipe } from './recipe/recipe.component';
 import { RecipeUploadComponent } from './recipe/recipe-upload/recipe-upload.component';
+import { MonitorPropertyComponent } from './gauges/controls/html-monitor/monitor-property/monitor-property.component';
+import { HtmlMonitorComponent } from './gauges/controls/html-monitor/html-monitor.component';
+import { MsePlayerComponent } from './gauges/controls/html-monitor/mse-player/mse-player.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -333,6 +336,9 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         RecipeComponent,
         DialogRecipe,
         RecipeUploadComponent,
+        MonitorPropertyComponent,
+        HtmlMonitorComponent,
+        MsePlayerComponent,
     ],
     imports: [
         BrowserModule,
