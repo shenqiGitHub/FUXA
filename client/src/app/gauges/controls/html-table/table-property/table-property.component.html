@@ -26,7 +26,7 @@
                         {{ ev.value }}
                     </mat-option>
                 </mat-select>
-            </div>            
+            </div>
         </div>
         <div class="element-property-header">
             <span>{{'table.property-header' | translate}}</span>
@@ -47,7 +47,7 @@
                 <input [(colorPicker)]="options.header.background" [cpAlphaChannel]="'always'" class="input-color" [style.background]="options.header.background"
                     [cpPresetColors]="defaultColor" [cpOKButton]="true" [cpCancelButton]="true" [cpCancelButtonClass]="'cpCancelButtonClass'"
                     [cpCancelButtonText]="'Cancel'" [cpOKButtonText]="'OK'" [cpOKButtonClass]="'cpOKButtonClass'" style="width: 88px"
-                    [cpPosition]="'auto'" (colorPickerChange)="onTableChanged()" /> 
+                    [cpPosition]="'auto'" (colorPickerChange)="onTableChanged()" />
             </div>
             <div class="section-inline-margin2"></div>
             <div class="my-form-field section-inline-color color-field">
@@ -77,7 +77,7 @@
                 <input [(colorPicker)]="options.row.background" [cpAlphaChannel]="'always'" class="input-color" [style.background]="options.row.background"
                     [cpPresetColors]="defaultColor" [cpOKButton]="true" [cpCancelButton]="true" [cpCancelButtonClass]="'cpCancelButtonClass'"
                     [cpCancelButtonText]="'Cancel'" [cpOKButtonText]="'OK'" [cpOKButtonClass]="'cpOKButtonClass'" style="width: 88px"
-                    [cpPosition]="'auto'" (colorPickerChange)="onTableChanged()" /> 
+                    [cpPosition]="'auto'" (colorPickerChange)="onTableChanged()" />
             </div>
             <div class="section-inline-margin2"></div>
             <div class="my-form-field section-inline-color color-field">
@@ -140,9 +140,13 @@
                         <div class="my-form-field section-inline-number">
                             <span>{{'table.property-column-type' | translate}}</span>
                             <input [(ngModel)]="column.type" type="text" [disabled]="true">
-                        </div>                        
+                        </div>
+                        <div class="my-form-field section-inline-number">
+                            <span>{{'table.property-column-type' | translate}}</span>
+                            <input [(ngModel)]="column.aggregation" type="text" [disabled]="true">
+                        </div>
                         <div class="section-item-newline">
-                            <div class="my-form-field section-inline-type">                            
+                            <div class="my-form-field section-inline-type">
                                 <span>{{'table.property-column-align' | translate}}</span>
                                 <mat-select [(value)]="column.align" (selectionChange)="onTableChanged()">
                                     <mat-option [value]="alignType.left">{{'table.cell-align-left' | translate}}</mat-option>
@@ -164,9 +168,9 @@
                         <div class="my-form-field section-inline-name">
                             <span>{{'table.property-row-name' | translate}}</span>
                             <input [(ngModel)]="row.name" (change)="onTableChanged()" (keyup.enter)="onTableChanged()" type="text" >
-                        </div>    
+                        </div>
                         <div class="section-inline-margin"></div>
-                        <div class="my-form-field section-inline-type">                            
+                        <div class="my-form-field section-inline-type">
                             <span>{{'table.property-row-type' | translate}}</span>
                             <mat-select [(value)]="column.type" (selectionChange)="onTableChanged()">
                                 <mat-option [value]="columnType.label">{{'table.property-column-label' | translate}}</mat-option>

@@ -381,6 +381,19 @@ export enum TableType {
     history = 'history',
 }
 
+export enum TableCellAggType{
+    sum = 'sum',
+    avg = 'avg',
+    cau = 'cau'
+}
+
+export enum TimeUnit {
+  hour = 'h',
+  day = 'd',
+  week = 'w',
+  month = 'm'
+}
+
 export interface TableOptions {
     paginator?: {
         show: boolean;
@@ -424,6 +437,8 @@ export class TableCell {
     valueFormat: string;
     bitmask: number;
     type: TableCellType;
+    aggType: string;
+    aggValue: string;
 
     constructor(id: string, type?: TableCellType, label?: string) {
         this.id = id;
@@ -516,6 +531,13 @@ export class DaqQuery {
     to: any;
     event: string;
     sids: string[];
+    sidsWithAggregation: {
+        key: string;
+        sid: string;
+        aggType?: string;
+        aggValue?: string;
+        commonQueryColumns: number[];
+    }[];
 }
 
 export interface DaqValue {
@@ -527,6 +549,7 @@ export interface DaqValue {
 export class DaqResult {
     gid: string;
     result: any;
+    resultColumnGroups?: any;
 }
 
 export class HelpData {
@@ -597,3 +620,6 @@ export interface ISvgElement {
     id: string;
     name: string;
 }
+
+
+

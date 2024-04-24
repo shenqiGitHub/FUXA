@@ -40,6 +40,37 @@
                 [withStaticValue]="false" [withBitmask]="true">
            </flex-variable>
         </div>
+        <div *ngIf="data.cell.type === columnType.variable"  style="display: block; margin-top: 10px;">
+            <div class="my-form-field section-inline-toggle slider-field">
+                <span>{{'table.property-agg' | translate}}</span>
+                <mat-slide-toggle color="primary" [(ngModel)]="aggEnable" (onchange)="aggEnableAction()"></mat-slide-toggle>
+            </div>
+            <div *ngIf="aggEnable" class="my-form-field" style="display: inline-block" [style.width.%]="25">
+                <span>{{'table.property-agg-type' | translate}}</span>
+                <mat-select [(value)]="data.cell.aggType" [style.width.%]="100">
+                    <mat-option *ngIf="!(data.table === tableType.data && data.type === cellType.column)" [value]="tableCellAggType.sum">
+                        {{'table.property-agg-sum' | translate}}</mat-option>
+                    <mat-option *ngIf="!(data.table === tableType.data && data.type === cellType.column)" [value]="tableCellAggType.avg">
+                        {{'table.property-agg-avg' | translate}}</mat-option>
+                    <mat-option *ngIf="!(data.table === tableType.data && data.type === cellType.column)" [value]="tableCellAggType.cau">
+                        {{'table.property-agg-cau' | translate}}</mat-option>
+                </mat-select>
+            </div>
+            <div *ngIf="aggEnable" class="my-form-field" style="display: inline-block ; margin-left: 16px;">
+                <span>{{'table.property-agg-time' | translate}}</span>
+                <input [(ngModel)]="aggValue" type="number" style="width: 60px">
+            </div>
+            <div *ngIf="aggEnable" class="my-form-field" style="display: inline-block ; margin-left: 16px;">
+                <span>{{'agg-timeuite' | translate}}</span>
+                <mat-select [(value)]="aggTimeUnit"  style="margin-left: 5%; width: 80px">
+                    <mat-option [value]="timeUnit.hour">{{'agg-timeuite-hour' | translate}}</mat-option>
+                    <mat-option [value]="timeUnit.day">{{'agg-timeuite-day' | translate}}</mat-option>
+                    <mat-option [value]="timeUnit.week">{{'agg-timeuite-week' | translate}}</mat-option>
+                    <mat-option [value]="timeUnit.month">{{'agg-timeuite-month' | translate}}</mat-option>
+                </mat-select>
+            </div>
+        </div>
+
     </div>
     <div mat-dialog-actions class="dialog-action">
         <button mat-raised-button (click)="onNoClick()">{{'dlg.cancel' | translate}}</button>

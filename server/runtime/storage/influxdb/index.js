@@ -195,6 +195,63 @@ function Influx(_settings, _log, _currentStorate) {
         });
     }
 
+    this.getDaqValueWithAgg = function(tagid, fromts, tots, AggType, interval){
+        return new Promise(function (resolve, reject) {
+            try {
+                // todo tagid check， fromts， tots， interval sql safe check
+                if (influxdbVersion === VERSION_18_FLUX) {
+                    fromts *= 1000000;
+                    tots *= 1000000;
+                    let aggStr;
+                    switch (AggType) {
+                        case 'avg':
+                            aggStr = 'MEAN(value)';
+                            break;
+                        case 'sum':
+                            aggStr = 'SUM(value)';
+                            break;
+                        case 'cau':
+                            aggStr = 'LAST(value) - FIRST(value)'
+                    }
+                    const query = `SELECT ${aggStr} as value FROM "${tagid}" WHERE time >= ${fromts} AND time <= ${tots} GROUP BY TIME(${interval})` ;
+                    client.query(query).then((result) => {
+                        resolve(result.map(row => { 
+                            return {
+                                dt: new Date(row.time).getTime(),
+                                value: row.value
+                            }
+                        }));
+                    })
+                    .catch((error) => {
+                        logger.error(`influxdb-getDaqValue failed! ${error}`);
+                        reject(error);
+                    });
+                } else {
+                    const query = flux`from(bucket: "${settings.daqstore.bucket}") |> range(start: ${new Date(fromts)}, stop: ${new Date(tots)}) |> filter(fn: (r) => r.id == "${tagid}")`;
+                    var result = [];
+                    queryApi.queryRows(query, {
+                        next(row, tableMeta) {
+                            const o = tableMeta.toObject(row);
+                            result = result.concat({ dt: new Date(o._time).getTime(), value: o._value });
+                        },
+                        error(error) {
+                            logger.error(`influxdb-getDaqValue failed! ${error}`);
+                            reject(error);
+                        },
+                        complete() {
+                            resolve(result);
+                        }
+                    });
+                }
+
+            } catch (error) {
+                logger.error(`influxdb-getDaqValue failed! ${error}`);
+                reject(error);
+            }
+        });
+
+    }
+
     function writePoints(points) {
         try {
             if (influxdbVersion === VERSION_18_FLUX) {

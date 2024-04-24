@@ -37,7 +37,7 @@ function S7client(_data, _logger, _events) {
                         s7client.SetConnectionType(data.property.connectionOption);
                         s7client.ConnectTo(data.property.address, data.property.rack, data.property.slot, function (err) {
                             if (err) {
-                                logger.error(`'${data.name}' connect failed! ${err}`);
+                                logger.error(`'${data.name}' connect failed! ${err}, errortext: ${s7client.ErrorText(err)}`);
                                 _emitStatus('connect-error');
                                 _clearVarsValue();
                                 reject();

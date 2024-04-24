@@ -84,6 +84,9 @@ export class MsePlayerComponent implements OnInit {
 
   }
 
+
+  isVideoPlaying = false;
+
   pushPacket(): void {
     const videoEl = document.querySelector('#mse-video') as HTMLVideoElement;
     let packet;
@@ -100,8 +103,15 @@ export class MsePlayerComponent implements OnInit {
         // no sound, browser paused video without sound in background
         videoEl.currentTime = videoEl.buffered.end((videoEl.buffered.length - 1)) - 0.5;
       }
+      //fix auto play fail
+      if(!this.isVideoPlaying){
+          videoEl.muted = true;
+          videoEl.play();
+          this.isVideoPlaying = true;
+      }
     }
   }
+
 
   readPacket(packet: any): void {
     if (!this.mseStreamingStarted) {

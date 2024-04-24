@@ -4,6 +4,7 @@
 
 var express = require("express");
 const authJwt = require('../jwt-helper');
+const daqstorage = require("../../runtime/storage/daqstorage");
 
 var runtime;
 var secureFnc;
@@ -34,11 +35,17 @@ module.exports = {
                 if (req.query && req.query.query) {
                     var query = JSON.parse(req.query.query);
                     var dbfncs = [];
-                    for (let i = 0; i < query.sids.length; i++) {
-                        if (query.to === query.from) {  // current values
-                            dbfncs.push([runtime.devices.getTagValue(query.sids[i], true)]);
-                        } else {                        // from history
-                            dbfncs.push(runtime.daqStorage.getNodeValues(query.sids[i], query.from, query.to));
+                    if (query.sidsWithAggregation && query.sidsWithAggregation.length) {
+                        query.sidsWithAggregation.forEach ( (item) => {
+                            dbfncs.push(runtime.daqStorage.getNodeValues(item.sid, query.from, query.to, item.aggType, item.aggValue));
+                        })
+                    } else if(query.sids && query.sids.length){
+                        for (let i = 0; i < query.sids.length; i++) {
+                            if (query.to === query.from) {  // current values
+                                dbfncs.push([runtime.devices.getTagValue(query.sids[i], true)]);
+                            } else {                        // from history
+                                dbfncs.push(runtime.daqStorage.getNodeValues(query.sids[i], query.from, query.to));
+                            }
                         }
                     }
                     if (query.to === query.from) {  // current values

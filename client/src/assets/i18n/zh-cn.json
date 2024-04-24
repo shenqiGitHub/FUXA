@@ -382,6 +382,19 @@
     "table.rangetype-last1d": "最后一天",
     "table.rangetype-last3d": "过去3天",
 
+    "table.property-agg": "聚合是否开启",
+    "table.property-agg-time": "数字",
+    "table.property-agg-type": "聚合函数",
+    "table.property-agg-sum": "求和",
+    "table.property-agg-avg": "平均",
+    "table.property-agg-cau": "最大与最小之差",
+     
+    "agg-timeuite": "时间单位",
+    "agg-timeuite-hour":"小时",
+    "agg-timeuite-day":"天",
+    "agg-timeuite-week":"周",
+    "agg-timeuite-month":"月",          
+
     "editor.view-svg": "画布/SVG",
     "editor.view-cards": "多视图容器",
     "editor.views": "视图",

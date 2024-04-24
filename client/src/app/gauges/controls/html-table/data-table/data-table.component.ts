@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 import { DaterangeDialogComponent } from '../../../../gui-helpers/daterange-dialog/daterange-dialog.component';
-import { IDateRange, DaqQuery, TableType, TableOptions, TableColumn, TableCellType, TableCell, TableRangeType } from '../../../../_models/hmi';
+import { IDateRange, DaqQuery, TableType, TableOptions, TableColumn, TableCellType, TableCell, TableRangeType} from '../../../../_models/hmi';
 import { format } from 'fecha';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -38,7 +38,7 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
     dataSource = new MatTableDataSource([]);
     tagsMap = {};
     timestampMap = {};
-    tagsColumnMap = {};
+    // tagsColumnMap: {[key: string]: any} = {};
     range = { from: Date.now(), to: Date.now() };
     tableHistoryType = TableType.history;
     lastRangeType = TableRangeType;
@@ -92,10 +92,28 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
             this.range.from = Date.now();
             this.range.to = Date.now();
             this.range.from = new Date(this.range.from).setTime(new Date(this.range.from).getTime() - (TableRangeConverter.TableRangeToHours(ev) * 60 * 60 * 1000));
-
-            this.lastDaqQuery.event = ev;
             this.lastDaqQuery.gid = this.id;
-            this.lastDaqQuery.sids = Object.keys(this.tagsColumnMap);
+            this.lastDaqQuery.sidsWithAggregation = this.tableOptions.columns.reduce((acc, column, currentIndex) => {
+                if (column.variableId) {
+                    const key = `${column.variableId}_${column.aggType}_${column.aggValue}`;
+                    // 查找是否已有该键的聚合信息
+                    const existing = acc.find(item => item.key === key);
+                    if (existing) {
+                        // 如果已存在，只需向id数组中添加当前索引
+                        existing.commonQueryColumns.push(currentIndex);
+                    } else {
+                        // 否则，创建新的聚合信息并添加到数组中
+                        acc.push({
+                            key,
+                            sid: column.variableId,
+                            aggType: column.aggType,
+                            aggValue: column.aggValue,
+                            commonQueryColumns: [currentIndex]
+                        });
+                    }
+                }
+                return acc;
+            }, []);
             this.lastDaqQuery.from = this.range.from;
             this.lastDaqQuery.to = this.range.to;
             this.onDaqQuery();
@@ -111,7 +129,27 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.range.from = dateRange.start;
                 this.range.to = dateRange.end;
                 this.lastDaqQuery.gid = this.id;
-                this.lastDaqQuery.sids = Object.keys(this.tagsColumnMap);
+                this.lastDaqQuery.sidsWithAggregation = this.tableOptions.columns.reduce((acc, column, currentIndex) => {
+                    if (column.variableId) {
+                        const key = `${column.variableId}_${column.aggType}_${column.aggValue}`;
+                        // 查找是否已有该键的聚合信息
+                        const existing = acc.find(item => item.key === key);
+                        if (existing) {
+                            // 如果已存在，只需向id数组中添加当前索引
+                            existing.commonQueryColumns.push(currentIndex);
+                        } else {
+                            // 否则，创建新的聚合信息并添加到数组中
+                            acc.push({
+                                key,
+                                sid: column.variableId,
+                                aggType: column.aggType,
+                                aggValue: column.aggValue,
+                                commonQueryColumns: [currentIndex]
+                            });
+                        }
+                    }
+                    return acc;
+                }, []);
                 this.lastDaqQuery.from = dateRange.start;
                 this.lastDaqQuery.to = dateRange.end;
                 this.onDaqQuery();
@@ -154,17 +192,21 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    setValues(values) {
+    setValues(values, resultColumnGroups) {
         // merge the data to have rows with 0:timestamp, n:variable values
+        const colunmLen = resultColumnGroups.flatMap(group => group).length;
         const rounder = {H: 3600000, m: 60000, s: 1000};
         const roundIndex = rounder[this.historyDateformat?.[this.historyDateformat?.length - 1]] ?? 1;
         let data = [];
-        data.push([]);    // timestamp, index 0
+        //set all column inclue timestamp
+        for(i = 0; i < colunmLen + 1; i++) {
+            data.push([]);
+        }
         let xmap = {};
-        for (var i = 0; i < values.length; i++) {
-            data.push([]);    // line
-            for (var x = 0; x < values[i].length; x++) {
+        for (i = 0; i < values.length; i++) {
+            for (x = 0; x < values[i].length; x++) {
                 let t = Math.round(values[i][x].dt / roundIndex) * roundIndex;
+                //以指定的单位取整时间
                 if (data[0].indexOf(t) === -1) {
                     data[0].push(t);
                     xmap[t] = {};
@@ -172,15 +214,21 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
                 xmap[t][i] = values[i][x].value;
             }
         }
+        //重新排序data 0 的时间戳，然后遍历xmap的以时间戳为key的value到 data n
         data[0].sort(function(a, b) { return b - a; });
-        for (var i = 0; i < data[0].length; i++) {
+        for (i = 0; i < data[0].length; i++) {
             let t = data[0][i];
-            for (var x = 1; x < data.length; x++) {
-                if (xmap[t][x - 1] !== undefined) {
-                    data[x].push(xmap[t][x - 1]);
-                } else {
-                    data[x].push(null);
-                }
+            //1，2，3
+            for (var c = 0; c < values.length; c++) {
+                let commAggColumn = resultColumnGroups[c];
+                //[1,3] [2]
+                commAggColumn.forEach(index => {
+                    if (xmap[t][c] !== undefined) {
+                        data[index].push(xmap[t][c]);
+                    } else {
+                        data[index].push(null);
+                    }
+                });
             }
         }
         for (var x = 1; x < data.length; x++) {
@@ -274,9 +322,9 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
             columnIds.push(cn.id);
             this.columnsStyle[cn.id] = cn;
             if (this.type === TableType.history) {
-                if (cn.variableId) {
-                    this.addColumnToMap(cn);
-                }
+                // if (cn.variableId) {
+                //     this.addColumnToMap(cn);
+                // }
                 if (cn.type === TableCellType.timestamp) {
                     this.historyDateformat = cn.valueFormat;
                 }
@@ -339,12 +387,12 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
         this.timestampMap[cell.rowIndex].push(cell);
     }
 
-    private addColumnToMap(cell: TableColumn) {
-        if (!this.tagsColumnMap[cell.variableId]) {
-            this.tagsColumnMap[cell.variableId] = [];
-        }
-        this.tagsColumnMap[cell.variableId].push(cell);
-    }
+    // private addColumnToMap(cell: TableColumn) {
+    //     if (!this.tagsColumnMap[cell.variableId]) {
+    //         this.tagsColumnMap[cell.variableId] = [];
+    //     }
+    //     this.tagsColumnMap[cell.variableId].push(cell);
+    // }
 
     public static DefaultOptions() {
         let options = <TableOptions> {
@@ -404,8 +452,3 @@ export class TableRangeConverter {
         return 0;
     }
 }
-
-// interface IRowDateTime {
-//     rowsIndex: number[];
-//     lastDateTime: string;
-// }

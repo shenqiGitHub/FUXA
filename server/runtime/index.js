@@ -197,16 +197,25 @@ function init(_io, _api, _settings, _log, eventsMain) {
                 logger.error(`${Events.IoEventTypes.DEVICE_NODE_ATTRIBUTE}: ${err}`);
             }
         });
-        // client query DAQ values
+        // client query DAQ values add agg Fun
         socket.on(Events.IoEventTypes.DAQ_QUERY, (msg) => {
             try {
-                if (msg && msg.from && msg.to && msg.sids && msg.sids.length) {
-                    var dbfncs = [];
-                    for (let i = 0; i < msg.sids.length; i++) {
-                        dbfncs.push(daqstorage.getNodeValues(msg.sids[i], msg.from, msg.to));
+                //to do 计划与/api/daq接口的类似代码合并
+                var dbfncs = [];
+                var resultColumnGroups = [];
+                if (msg && msg.from && msg.to && msg.sidsWithAggregation && msg.sidsWithAggregation.length) {
+                    msg.sidsWithAggregation.forEach ( (item) => {
+                        dbfncs.push(runtime.daqStorage.getNodeValues(item.sid, msg.from, msg.to, item.aggType, item.aggValue));
+                        resultColumnGroups.push(item.commonQueryColumns);
+                    })
+                } else if(msg && msg.from && msg.to && msg.sids && msg.sids.length){
+                    for (const sid of msg.sids) {
+                        dbfncs.push(daqstorage.getNodeValues(sid, msg.from, msg.to));
                     }
+                }
+                if(dbfncs.length > 0){
                     Promise.all(dbfncs).then(values => {
-                        io.emit(Events.IoEventTypes.DAQ_RESULT, { gid: msg.gid, result: values });
+                        io.emit(Events.IoEventTypes.DAQ_RESULT, { gid: msg.gid, result: values, resultColumnGroups: resultColumnGroups });
                     }, reason => {
                         if (reason && reason.stack) {
                             logger.error(`${Events.IoEventTypes.DAQ_QUERY}: ${reason.stack}`);

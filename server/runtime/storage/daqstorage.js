@@ -56,11 +56,15 @@ function addDaqNode(_id, fncgetprop) {
     // return daqnodes[id].addDaqValue;
 }
 
-function getNodeValues(tagid, fromts, tots) {
+function getNodeValues(tagid, fromts, tots, aggType, aggValue) {
     return new Promise(function (resolve, reject) {
         var daqnode = _getDaqNode(tagid);
         if (daqnode) {
-            resolve(daqnode.getDaqValue(tagid, fromts, tots));
+            if(aggType && aggValue){
+                resolve(daqnode.getDaqValueWithAgg(tagid, fromts, tots, aggType, aggValue));
+            }else{
+                resolve(daqnode.getDaqValue(tagid, fromts, tots));            
+            }
         } else {
             resolve([]);
         }

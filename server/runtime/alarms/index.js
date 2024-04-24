@@ -533,7 +533,15 @@ function Alarm(name, type, subprop, tagprop) {
         return this.name + '^~^' + this.type;
     }
 
+    /**
+     * 
+     * @param {*} time 系统时间
+     * @param {*} dt 对应tag最后更新时间
+     * @param {*} value 预警值 掩码处理后
+     * @returns 
+     */
     this.check = function (time, dt, value) {
+        //延迟检查，只有达到延迟才跳过
         if (this.lastcheck + (this.subproperty.checkdelay * TimeMultiplier) > time) {
             return false;
         }

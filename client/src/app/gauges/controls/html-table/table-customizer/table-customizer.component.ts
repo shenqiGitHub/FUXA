@@ -2,7 +2,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { TableType, TableColumn, TableRow, TableCell, TableCellType } from '../../../../_models/hmi';
+import { TableType, TableColumn, TableRow, TableCell, TableCellType, TableCellAggType, TimeUnit} from '../../../../_models/hmi';
 
 import { ProjectService } from '../../../../_services/project.service';
 import { Utils } from '../../../../_helpers/utils';
@@ -184,21 +184,42 @@ export class DialogTableCell {
     tableType = TableType;
     cellType = CellType;
     columnType = TableCellType;
+    tableCellAggType = TableCellAggType;
+    timeUnit = TimeUnit;
+    aggEnable = false;
+    aggValue: number;
+    aggTimeUnit: TimeUnit;
     devicesValues = { devices: null };
     constructor(
         private projectService: ProjectService,
         public dialogRef: MatDialogRef<DialogTableCell>,
         @Inject(MAT_DIALOG_DATA) public data: ITableCell) {
             this.devicesValues.devices = Object.values(this.projectService.getDevices());
+            if(this.data.cell.aggValue){
+                this.aggEnable = true;
+                const parts = this.splitNumberAndLetters(this.data.cell.aggValue);
+                this.aggValue =  parts.numericPart;
+                this.aggTimeUnit = <TimeUnit>parts.alphaPart;
+            }
         }
 
     onNoClick(): void {
         this.dialogRef.close();
     }
 
-    onOkClick(): void {
 
+    onOkClick(): void {
+        if(this.aggEnable && this.aggValue !== undefined && this.aggTimeUnit !== undefined){
+            this.data.cell.aggValue = this.aggValue + this.aggTimeUnit;
+        } else{
+            this.data.cell.aggType = undefined;
+            this.data.cell.aggValue = undefined;
+        }
         this.dialogRef.close(this.data);
+    }
+
+    aggEnableAction(): void {
+        this.aggEnable = !this.aggEnable;
     }
 
     onSetVariable(event) {
@@ -222,6 +243,17 @@ export class DialogTableCell {
             }
         }
     }
+
+    splitNumberAndLetters(input: string): { numericPart: number, alphaPart: string } {
+        const match = input.match(/^(\d+\.*\d*)([hdwm])$/);
+        if (match) {
+            const numericPart: number = parseFloat(match[1]); // 使用 parseFloat 转换为数字
+            const alphaPart: string = match[2];
+            return { numericPart, alphaPart };
+        } else {
+            throw new Error("输入格式不正确");
+    }
+}    
 }
 
 export interface ITableCustom {
