@@ -211,7 +211,7 @@ function Influx(_settings, _log, _currentStorate) {
                             aggStr = 'SUM(value)';
                             break;
                         case 'cau':
-                            aggStr = 'LAST(value) - FIRST(value)'
+                            aggStr = 'SPREAD(value)'
                     }
                     const query = `SELECT ${aggStr} as value FROM "${tagid}" WHERE time >= ${fromts} AND time <= ${tots} GROUP BY TIME(${interval})` ;
                     client.query(query).then((result) => {
@@ -227,7 +227,18 @@ function Influx(_settings, _log, _currentStorate) {
                         reject(error);
                     });
                 } else {
-                    const query = flux`from(bucket: "${settings.daqstore.bucket}") |> range(start: ${new Date(fromts)}, stop: ${new Date(tots)}) |> filter(fn: (r) => r.id == "${tagid}")`;
+                    let aggStr = '';
+                    switch (AggType) {
+                        case 'avg':
+                            aggStr = 'mean';
+                            break;
+                        case 'sum':
+                            aggStr = 'sum';
+                            break;
+                        case 'cau':
+                            aggStr = 'spread'
+                    }
+                    const query = `from(bucket: "${settings.daqstore.bucket}") |> range(start: ${new Date(fromts).toISOString().split('.')[0]+'Z'}, stop: ${new Date(tots).toISOString().split('.')[0]+'Z'}) |> filter(fn: (r) => r.id == "${tagid}")|> aggregateWindow(every: ${interval}, fn: ${aggStr})`;
                     var result = [];
                     queryApi.queryRows(query, {
                         next(row, tableMeta) {
