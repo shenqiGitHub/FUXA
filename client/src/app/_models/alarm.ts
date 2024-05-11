@@ -96,7 +96,16 @@ export class AlarmEvent {
 export class AlarmQuery {
     start: Date;
     end: Date;
+
 }
+
+export class AlarmExcelExport extends AlarmQuery{
+    sheetName: string;
+    type: number;
+    headerInfo: any;
+    dicts: any;
+}
+
 
 export interface IAlarmHistory {
     type: string;

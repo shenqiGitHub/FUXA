@@ -8,33 +8,11 @@
 </div>
 <div class="work-panel" [ngStyle]="{'height': (!showInContainer && (fullview || currentShowMode === 'expand')) ? 'calc(100% - 83px)' : 'calc(100% - 37px)'}">
     <mat-table #table [dataSource]="dataSource" matSort>
-        <ng-container matColumnDef="ontime">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-ontime' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{element.ontime | date: 'yyyy.MM.dd HH:mm:ss'}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="text">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-text' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{element.text}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="type">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-type' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{element.type}}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="group">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-group' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{element.group}}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="status">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-status' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{element.status}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="offtime">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-offtime' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{(element.offtime) ? (element.offtime | date: 'yyyy.MM.dd HH:mm:ss') : ''}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="acktime">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> {{'alarms.view-acktime' | translate}} </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color"> {{(element.acktime) ? (element.acktime | date: 'yyyy.MM.dd HH:mm:ss') : ''}} </mat-cell>
+        <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> {{ column.headerKey | translate }} </mat-header-cell>
+            <mat-cell *matCellDef="let element" [style.color]="element.color">
+                {{ element[column.key] ? (column.numFmt ? (element[column.key] | date: column.numFmt) : element[column.key]) : '' }}
+            </mat-cell>
         </ng-container>
         <ng-container matColumnDef="ack">
             <mat-header-cell *matHeaderCellDef>
@@ -53,7 +31,7 @@
             <mat-cell *matCellDef="let element" [style.color]="element.color"> {{element.userack}}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="history">
-            <mat-header-cell *matHeaderCellDef [style.flex]="(showInContainer) ? '0 0 10px' : '0 0 90px'">
+            <mat-header-cell *matHeaderCellDef [style.flex]="(showInContainer) ? '0 0 60px' : '0 0 150px'">
                 <div class="header-tools" *ngIf="!fullview || showInContainer">
                     <button mat-icon-button [matMenuTriggerFor]="optionsgMenu" class="header-tools-options">
                         <mat-icon>more_vert</mat-icon>
@@ -62,6 +40,11 @@
                         <button mat-menu-item (click)="onShowAlarms()" style="font-size: 14px;">{{'alarms.show-current' | translate}}</button>
                         <button mat-menu-item (click)="picker.open()" style="font-size: 14px;">{{'alarms.show-history' | translate}}</button>
                     </mat-menu>
+                    <div style="display: inline-block;">
+                        <button mat-icon-button  (click)="exportCurrentData()" matTooltip="{{'alarms.export-excel' | translate}}">
+                            <mat-icon>file_download</mat-icon>
+                        </button>
+                    </div>
                     <div style="display: inline-block;padding-left: unset;" *ngIf="!showInContainer">
                         <button mat-icon-button (click)="$event.stopPropagation();onShowMode('expand')" *ngIf="currentShowMode === 'collapse'" class="header-tools-options">
                             <mat-icon>fullscreen</mat-icon>
@@ -75,7 +58,7 @@
                     </div>
                 </div>
             </mat-header-cell>
-            <mat-cell *matCellDef="let element" [style.color]="element.color" [style.flex]="(showInContainer) ? '0 0 10px' : '0 0 90px'"></mat-cell>
+            <mat-cell *matCellDef="let element" [style.color]="element.color" [style.flex]="(showInContainer) ? '0 0 60px' : '0 0 150px'"></mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="displayColumns; sticky: true"></mat-header-row>
         <mat-row *matRowDef="let element; columns: displayColumns;" class="my-mat-row" [style.background-color]="element.bkcolor"></mat-row>
@@ -93,5 +76,5 @@
             <button mat-button matDateRangePickerCancel>{{'dlg.cancel' | translate}}</button>
             <button mat-raised-button color="primary" matDateRangePickerApply (click)="onShowAlarmsHistory()">{{'dlg.apply' | translate}}</button>
           </mat-date-range-picker-actions>
-    </mat-date-range-picker>   
+    </mat-date-range-picker>
 </div>

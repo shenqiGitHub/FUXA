@@ -17,6 +17,7 @@ var utils = require('./utils');
 const daqstorage = require('./storage/daqstorage');
 var jobs = require('./jobs');
 var recipe = require('./recipe');
+var excelUnit = require('./excel')
 
 var api;
 var settings
@@ -76,6 +77,7 @@ function init(_io, _api, _settings, _log, eventsMain) {
         logger.error('runtime.failed-to-init project');
     });
     alarmsMgr = alarms.create(runtime);
+    excelsMgr = excelUnit.create(runtime);
     notificatorMgr = notificator.create(runtime);
     scriptsMgr = scripts.create(runtime);
     jobsMgr = jobs.create(runtime);
@@ -583,6 +585,7 @@ var runtime = module.exports = {
     get notificatorMgr() { return notificatorMgr },
     get scriptsMgr() { return scriptsMgr },
     get jobsMgr() { return jobsMgr },
+    get excelsMgr() { return excelsMgr},
     events: events,
     scriptSendCommand: scriptSendCommand,
 }

@@ -1,3 +1,15 @@
+:host {
+    --column-ontime-width: 150px;
+    --column-offtime-width: 150px;
+    --column-text-width: 200px;
+    --column-type-width: 120px;
+    --column-group-width: 100px;
+    --column-status-width: 160px;
+    --column-ack-width: 60px;
+    --column-acktime-width: 150px;
+    --column-userack-width: 120px;
+    --column-history-width: 90px;
+}
 .header-panel {
     /* z-index: 9999 !important; */
     /* position: fixed; */
@@ -44,7 +56,7 @@
     overflow: auto;
     height: 100%;
 }
-  
+
 .mat-header-cell.mat-sort-header-sorted {
     /* color: black; */
 }
@@ -64,35 +76,35 @@
     min-height: 34px;
 }
 .mat-column-ontime {
-    flex: 0 0 150px;
+    flex: 0 0 var(--column-ontime-width);
 }
 .mat-column-offtime {
-    flex: 0 0 150px;
+    flex: 0 0 var(--column-offtime-width);
 }
 .mat-column-text {
-    flex: 2 1 200px;
+    flex: 2 1 var(--column-text-width);
 }
 .mat-column-type {
-    flex: 0 1 120px;
+    flex: 0 1 var(--column-type-width);
 }
 .mat-column-group {
-    flex: 1 1 100px;
+    flex: 1 1 var(--column-group-width);
 }
 
 .mat-column-status {
-    flex: 0 1 160px;
+    flex: 0 1 var(--column-status-width);
 }
 .mat-column-ack {
-    flex: 0 0 60px;
+    flex: 0 0 var(--column-ack-width);
 }
 .mat-column-acktime {
-    flex: 0 0 150px;
+    flex: 0 0 var(--column-acktime-width);
 }
 .mat-column-userack {
-    flex: 0 0 120px;
+    flex: 0 0 var(--column-userack-width);
 }
 .mat-column-history {
-    flex: 0 0 90px;
+    flex: 0 0 var(--column-history-width);
 }
 
 .header-tools {

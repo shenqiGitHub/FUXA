@@ -6,11 +6,15 @@ import { TranslateService } from '@ngx-translate/core';
 import { EndPointApi } from '../_helpers/endpointapi';
 import { ToastrService } from 'ngx-toastr';
 import { AppSettings, DaqStore, SmtpSettings } from '../_models/settings';
+import { EventEmitter } from '@angular/core';
+import {firstValueFrom} from 'rxjs';
+
 
 @Injectable({
     providedIn: 'root'
 })
 export class SettingsService {
+    public onInitComplete: EventEmitter<void> = new EventEmitter();
 
     private appSettings = new AppSettings();
     private endPointConfig: string = EndPointApi.getURL();
@@ -23,19 +27,21 @@ export class SettingsService {
         private toastr: ToastrService) {
     }
 
-    init() {
-        // this language will be used as a fallback when a translation isn't found in the current language
-		this.fuxaLanguage.setDefaultLang('en');
-		// the lang to use, if the lang isn't available, it will use the current loader to get them
-		this.fuxaLanguage.use('en');
-        // to load saved settings
+    async init() {
+        this.fuxaLanguage.setDefaultLang('en');
+        this.fuxaLanguage.use('en');
+
         if (environment.serverEnabled) {
-            this.http.get<any>(this.endPointConfig + '/api/settings').subscribe(result => {
+            try {
+                const result = await firstValueFrom(this.http.get<any>(this.endPointConfig + '/api/settings'));
                 this.setSettings(result);
-            }, error => {
+                // 设置完成后触发完成事件
+                this.onInitComplete.emit();
+            } catch (error) {
                 console.error('settings.service err: ' + error);
-            });
+            }
         }
+        // 根据实际情况决定是否在此处调用
         // this.setLanguage(this.appSettings.language);
     }
 

@@ -7,7 +7,7 @@ import { ProjectData, ProjectDataCmdType, UploadFile } from '../_models/project'
 import { View, LayoutSettings, DaqQuery } from '../_models/hmi';
 import { Chart } from '../_models/chart';
 import { Graph } from '../_models/graph';
-import { Alarm, AlarmQuery } from '../_models/alarm';
+import {Alarm, AlarmExcelExport, AlarmQuery} from '../_models/alarm';
 import { Notification } from '../_models/notification';
 import { Script } from '../_models/script';
 import { Text } from '../_models/text';
@@ -540,6 +540,10 @@ export class ProjectService {
 
     getAlarmsHistory(query: AlarmQuery): Observable<any> {
         return this.storage.getAlarmsHistory(query);
+    }
+
+    getAlarmExcel(query: AlarmExcelExport): Observable<any> {
+        return this.storage.getAlarmExcel(query);
     }
 
     setAlarmAck(name: string): Observable<any> {

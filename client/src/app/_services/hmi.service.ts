@@ -4,7 +4,7 @@ import * as io from 'socket.io-client';
 import { environment } from '../../environments/environment';
 import { Tag, DeviceType } from '../_models/device';
 import { Hmi, Variable, GaugeSettings, DaqQuery, DaqResult, GaugeEventSetValueType } from '../_models/hmi';
-import { AlarmQuery } from '../_models/alarm';
+import {AlarmExcelExport, AlarmQuery} from '../_models/alarm';
 import { ProjectService } from '../_services/project.service';
 import { EndPointApi } from '../_helpers/endpointapi';
 import { Utils } from '../_helpers/utils';
@@ -554,6 +554,10 @@ export class HmiService {
         return this.projectService.getAlarmsHistory(query);
     }
 
+    getAlarmExcel(query: AlarmExcelExport) {
+        return this.projectService.getAlarmExcel(query);
+    }
+
     setAlarmAck(alarmName: string) {
         return this.projectService.setAlarmAck(alarmName);
     }
@@ -581,6 +585,8 @@ export class HmiService {
                 break;
         }
     }
+
+
 }
 
 class ViewSignalGaugeMap {

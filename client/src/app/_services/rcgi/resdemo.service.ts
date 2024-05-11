@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 import { ProjectData, ProjectDataCmdType, UploadFile } from '../../_models/project';
 import { ResourceStorageService } from './resource-storage.service';
-import { AlarmQuery } from '../../_models/alarm';
+import {AlarmExcelExport, AlarmQuery} from '../../_models/alarm';
 import { DaqQuery } from '../../_models/hmi';
 import { CommanType } from '../command.service';
 
@@ -79,6 +79,12 @@ export class ResDemoService implements ResourceStorageService {
     }
 
     getAlarmsHistory(query: AlarmQuery): Observable<any> {
+        return new Observable((observer) => {
+            observer.error('Not supported!');
+        });
+    }
+
+    getAlarmExcel(query: AlarmExcelExport): Observable<any> {
         return new Observable((observer) => {
             observer.error('Not supported!');
         });

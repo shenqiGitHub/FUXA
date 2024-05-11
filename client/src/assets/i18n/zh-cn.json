@@ -316,7 +316,7 @@
 
     "monitor.property-data": "数据",
     "monitor.property-address": "地址",
-    "monitor.property-name": "名称",    
+    "monitor.property-name": "名称",
 
     "table.property-title": "数据表设置",
     "table.property-data": "数据",
@@ -388,12 +388,12 @@
     "table.property-agg-sum": "求和",
     "table.property-agg-avg": "平均",
     "table.property-agg-cau": "最大与最小之差",
-     
+
     "agg-timeuite": "时间单位",
     "agg-timeuite-hour":"小时",
     "agg-timeuite-day":"天",
     "agg-timeuite-week":"周",
-    "agg-timeuite-month":"月",          
+    "agg-timeuite-month":"月",
 
     "editor.view-svg": "画布/SVG",
     "editor.view-cards": "多视图容器",
@@ -998,6 +998,7 @@
     "alarm.property-action-type": "行动类型",
     "alarm.property-action-value": "要设置的值",
     "alarm.property-action-destination": "要显示的视图",
+    "alarms.export-excel": "导出excel",
 
     "notifications.list-title": "通知设置",
     "notifications.list-name": "名称",

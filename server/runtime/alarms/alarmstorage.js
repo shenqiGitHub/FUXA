@@ -142,13 +142,14 @@ function setAlarms(alarms) {
             alarms.forEach(alr => {
                 let grp = alr.subproperty.group || '';
                 let status = alr.status || '';
+                let text = alr.subproperty.text || '';
                 let userack = alr.userack || '';
                 //is alarm condition is changed (if it is occured or acknowledged) insert or update record
                 sql += "INSERT OR REPLACE INTO alarms (nametype, type, status, ontime, offtime, acktime) VALUES('" +
                     alr.getId() + "','" + alr.type + "','" + status + "','" + alr.ontime + "','" + alr.offtime + "','" + alr.acktime + "');" +
                     "INSERT OR REPLACE INTO chronicle (Sn, nametype, type, status, text, grp, ontime, offtime,  acktime, userack)" +
                     " VALUES ((SELECT Sn from chronicle WHERE ontime='" + alr.ontime + "' AND nametype='" + alr.getId() + "'),'" +
-                    alr.getId() + "','" + alr.type + "','" + status + "','" + alr.subproperty.text + "','" + grp + "','" + alr.ontime + "','" + alr.offtime + "','" + alr.acktime + "','" + userack + "');";
+                    alr.getId() + "','" + alr.type + "','" + status + "','" + text + "','" + grp + "','" + alr.ontime + "','" + alr.offtime + "','" + alr.acktime + "','" + userack + "');";
                 if (alr.toremove) {
                     //is alarm to be removed (if it is ok) delete it from db
                     sql += "DELETE FROM alarms WHERE nametype = '" + alr.getId() + "';";

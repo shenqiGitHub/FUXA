@@ -4,6 +4,7 @@
 
 var express = require("express");
 const authJwt = require('../jwt-helper');
+const { PassThrough } = require('stream');
 var runtime;
 var secureFnc;
 var checkGroupsFnc;
@@ -127,6 +128,42 @@ module.exports = {
             });      
 		  }			
         });
+        alarmsApp.post("/api/alarms/Excel", secureFnc, async function(req, res, next) {
+            var groups = checkGroupsFnc(req);
+            if (res.statusCode === 403) {
+                runtime.logger.error("api post alarms: Tocken Expired");
+            } else if (authJwt.adminGroups.indexOf(groups) === -1 ) {
+                res.status(401).json({error:"unauthorized_error", message: "Unauthorized!"});
+                runtime.logger.error("api post alarms: Unauthorized");
+            } else {
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                try{
+                    var stream = new PassThrough();
+                    let data;
+                    let sheetName;
+                    sheetName = req.body.sheetName;
+                    if(req.body.type === 1){
+                        data = await runtime.alarmsMgr.getAlarmsHistory(req.body, groups);
+                    }else {
+                        data = await runtime.alarmsMgr.getAlarmsValues(req.body, groups);
+                    }
+                    res.setHeader("Content-Disposition", "attachment; filename=" + `${encodeURIComponent(sheetName)}.xlsx`);
+                    await runtime.excelsMgr.excelJsExport({sheetName: sheetName, headerColumns:req.body.headerInfo, tableData: data, dicts: req.body.dicts }, stream);
+                    stream.pipe(res);
+                    stream.end();
+                }catch(err) {
+                    stream.end();
+                    if (err.code) {
+                        res.status(400).json({error:err.code, message: err.message});
+                    } else {
+                        res.status(400).json({error:"unexpected_error", message:err.toString()});
+                    }
+                    runtime.logger.error("api post alarms-clear: " + err.message);
+                };
+            }
+        });
         return alarmsApp;
+
     }
+
 }
