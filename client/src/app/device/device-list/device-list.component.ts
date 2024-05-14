@@ -19,6 +19,7 @@ import { HmiService } from '../../_services/hmi.service';
 import { Node, NodeType } from '../../gui-helpers/treetable/treetable.component';
 import { ConfirmDialogComponent } from '../../gui-helpers/confirm-dialog/confirm-dialog.component';
 import { Utils } from '../../_helpers/utils';
+import { TagPropertyService } from '../tag-property/tag-property.service';
 
 @Component({
     selector: 'app-device-list',
@@ -60,6 +61,7 @@ export class DeviceListComponent implements OnInit, AfterViewInit {
         private translateService: TranslateService,
         private changeDetector: ChangeDetectorRef,
         private projectService: ProjectService,
+        private tagPropertyService: TagPropertyService,
         private toastr: ToastrService) { }
 
     ngOnInit() {
@@ -281,6 +283,27 @@ export class DeviceListComponent implements OnInit, AfterViewInit {
     }
 
     editTag(tag: Tag, checkToAdd: boolean) {
+        if (this.deviceSelected.type === DeviceType.SiemensS7) {
+            this.tagPropertyService.editTagPropertyS7(this.deviceSelected, tag, checkToAdd).subscribe(result => {
+                this.tagsMap[tag.id] = tag;
+                this.bindToTable(this.deviceSelected.tags);
+            });
+            return;
+        }
+        if (this.deviceSelected.type === DeviceType.FuxaServer) {
+            this.tagPropertyService.editTagPropertyServer(this.deviceSelected, tag, checkToAdd).subscribe(result => {
+                this.tagsMap[tag.id] = tag;
+                this.bindToTable(this.deviceSelected.tags);
+            });
+            return;
+        }
+        if (this.deviceSelected.type === DeviceType.ModbusRTU || this.deviceSelected.type === DeviceType.ModbusTCP) {
+            this.tagPropertyService.editTagPropertyModbus(this.deviceSelected, tag, checkToAdd).subscribe(result => {
+                this.tagsMap[tag.id] = tag;
+                this.bindToTable(this.deviceSelected.tags);
+            });
+            return;
+        }
         let oldtag = tag.id;
         let temptag: Tag = JSON.parse(JSON.stringify(tag));
         let dialogRef = this.dialog.open(TagPropertyComponent, {
@@ -304,10 +327,6 @@ export class DeviceListComponent implements OnInit, AfterViewInit {
                     tag.divisor = temptag.divisor;
                     if (this.deviceSelected.type === DeviceType.internal) {
                         tag.value = '0';
-                    }
-                    if (this.deviceSelected.type === DeviceType.FuxaServer) {
-                        tag.init = temptag.init;
-                        tag.value = temptag.init;
                     }
                     if (checkToAdd) {
                         this.checkToAdd(tag, result.device);

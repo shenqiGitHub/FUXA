@@ -15,7 +15,7 @@
 	<mat-sidenav-content [style.background-color]="backgroudColor" (click)="checkToCloseSideNav()">
 		<div *ngIf="showNavigation" class="header" [style.background-color]="layoutHeader.bkcolor" [style.color]="layoutHeader.fgcolor">
 			<div *ngIf="showSidenav && showSidenav !== 'side'" class="sidenav-toogle">
-				<button mat-icon-button 
+				<button mat-icon-button
 					(click)="$event.stopPropagation(); (matsidenav.opened) ? matsidenav.close() : matsidenav.open()">
 					<mat-icon aria-label="Menu">menu</mat-icon>
 				</button>
@@ -25,7 +25,7 @@
 					<ng-container *ngSwitchCase="'button'">
 						<button mat-raised-button
 								[id]="item.id"
-								[style.background-color]="item.bkcolor ?? layoutHeader.bkcolor" 
+								[style.background-color]="item.bkcolor ?? layoutHeader.bkcolor"
 								[style.color]="item.fgcolor ?? layoutHeader.fgcolor"
 								[style.fontFamily]="layoutHeader.fontFamily"
 								[style.fontSize]="layoutHeader.fontSize + 'px !important'"
@@ -37,7 +37,7 @@
 					<ng-container *ngSwitchCase="'label'">
 						<button mat-button
 								[id]="item.id"
-								[style.background-color]="item.bkcolor ?? layoutHeader.bkcolor" 
+								[style.background-color]="item.bkcolor ?? layoutHeader.bkcolor"
 								[style.color]="item.fgcolor ?? layoutHeader.fgcolor"
 								[style.fontFamily]="layoutHeader.fontFamily"
 								[style.fontSize]="layoutHeader.fontSize + 'px !important'"
@@ -49,7 +49,7 @@
 					<ng-container *ngSwitchCase="'image'">
 						<button mat-icon-button
 								[id]="item.id"
-								[style.background-color]="item.bkcolor ?? layoutHeader.bkcolor" 
+								[style.background-color]="item.bkcolor ?? layoutHeader.bkcolor"
 								[style.color]="item.fgcolor ?? layoutHeader.fgcolor"
 								[style.marginLeft.px]="item.marginLeft"
 								[style.marginRight.px]="item.marginRight">
@@ -70,6 +70,9 @@
 						<mat-icon aria-label="Info">error_outline</mat-icon>
 						<div class="button-counter info-color" [style.opacity]="infos.count?'':'0'">{{infos.count}}</div>
 					</button>
+				</div>
+				<div class="header-date-time" *ngIf="layoutHeader.dateTimeDisplay">
+                    {{ currentDateTime | date: layoutHeader.dateTimeDisplay }}
 				</div>
 				<div *ngIf="securityEnabled" class="header-login">
 					<button mat-icon-button (click)="onLogin()">

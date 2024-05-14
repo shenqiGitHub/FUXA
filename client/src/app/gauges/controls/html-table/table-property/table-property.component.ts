@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { TranslateService } from '@ngx-translate/core';
 
-import { TableType, TableCellType, TableCellAlignType, TableRangeType } from '../../../../_models/hmi';
+import {TableType, TableCellType, TableCellAlignType, TableRangeType, TableCellAggType} from '../../../../_models/hmi';
 import { DataTableComponent } from '../data-table/data-table.component';
 import { TableCustomizerComponent, ITableCustom } from '../table-customizer/table-customizer.component';
 import { Utils } from '../../../../_helpers/utils';
@@ -14,7 +14,7 @@ import { Utils } from '../../../../_helpers/utils';
 @Component({
     selector: 'app-table-property',
     templateUrl: './table-property.component.html',
-    styleUrls: ['./table-property.component.css']
+    styleUrls: ['./table-property.component.scss']
 })
 export class TablePropertyComponent implements OnInit, OnDestroy {
 
@@ -91,4 +91,6 @@ export class TablePropertyComponent implements OnInit, OnDestroy {
             }
         });
     }
+
+    protected readonly tableCellAggType = TableCellAggType;
 }

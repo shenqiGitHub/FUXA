@@ -459,7 +459,7 @@ function getDeviceTagsResult(deviceId) {
  * @param {*} type 
  */
 function getSupportedProperty(endpoint, type) {
-    return Device.getSupportedProperty(endpoint, type);
+    return Device.getSupportedProperty(endpoint, type, runtime.plugins.manager);
 }
 
 /**

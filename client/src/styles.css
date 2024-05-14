@@ -568,11 +568,11 @@ app-root {
 }
 
 .my-form-field-link {
-    position:absolute; 
-    bottom: 0px; 
-    right: 0px; 
-    height: 28px; 
-    width: 28px; 
+    position:absolute;
+    bottom: 0px;
+    right: 0px;
+    height: 28px;
+    width: 28px;
     border-radius: 2px 0px 0px 2px;
     background-color: var(--formInputBackground);
     color: var(--formInputColor);
@@ -875,12 +875,12 @@ mat-toolbar-row {
     cursor: pointer;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
     font-size: 13px;
-    padding: 5px 2px 6px 3px !important;    
+    padding: 5px 2px 6px 3px !important;
     color:gray;
 }
 
 .input-color input:focus {
-    padding: 5px 2px 6px 3px !important;    
+    padding: 5px 2px 6px 3px !important;
     /* background-color: white; */
     border: 1px solid var(--formInputBorderFocus);
 }
@@ -962,6 +962,7 @@ mat-toolbar-row {
 /* Element side property */
 .element-property {
     display: block;
+    width: calc(100% - 10px);
 }
 
 .element-property-title {
@@ -1152,4 +1153,11 @@ mat-toolbar-row {
 
 .tac {
     text-align: center;
+}
+
+.form-input-error {
+    display: block;
+    color: #ff9122;
+    font-size: 12px !important;
+    font-weight: bold;
 }

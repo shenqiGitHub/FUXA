@@ -38,7 +38,6 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
     dataSource = new MatTableDataSource([]);
     tagsMap = {};
     timestampMap = {};
-    // tagsColumnMap: {[key: string]: any} = {};
     range = { from: Date.now(), to: Date.now() };
     tableHistoryType = TableType.history;
     lastRangeType = TableRangeType;
@@ -196,6 +195,7 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
         // merge the data to have rows with 0:timestamp, n:variable values
         const colunmLen = resultColumnGroups.flatMap(group => group).length;
         const rounder = {H: 3600000, m: 60000, s: 1000};
+        //todo
         const roundIndex = rounder[this.historyDateformat?.[this.historyDateformat?.length - 1]] ?? 1;
         let data = [];
         //set all column inclue timestamp
@@ -386,13 +386,6 @@ export class DataTableComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.timestampMap[cell.rowIndex].push(cell);
     }
-
-    // private addColumnToMap(cell: TableColumn) {
-    //     if (!this.tagsColumnMap[cell.variableId]) {
-    //         this.tagsColumnMap[cell.variableId] = [];
-    //     }
-    //     this.tagsColumnMap[cell.variableId].push(cell);
-    // }
 
     public static DefaultOptions() {
         let options = <TableOptions> {

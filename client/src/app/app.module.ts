@@ -40,7 +40,7 @@ import { AlarmPropertyComponent } from './alarms/alarm-property/alarm-property.c
 import { NotificationListComponent } from './notifications/notification-list/notification-list.component';
 import { NotificationPropertyComponent } from './notifications/notification-property/notification-property.component';
 import { ScriptListComponent } from './scripts/script-list/script-list.component';
-import { ScriptEditorComponent, DialogScriptParam } from './scripts/script-editor/script-editor.component';
+import { ScriptEditorComponent } from './scripts/script-editor/script-editor.component';
 import { ScriptSchedulingComponent } from './scripts/script-scheduling/script-scheduling.component';
 import { ScriptPermissionComponent } from './scripts/script-permission/script-permission.component';
 import { TextListComponent, DialogItemText } from './text-list/text-list.component';
@@ -57,7 +57,7 @@ import { CardsViewComponent } from './cards-view/cards-view.component';
 import { TesterComponent } from './tester/tester.component';
 import { TesterService } from './tester/tester.service';
 import { UserService } from './_services/user.service';
-import { RecipeService} from "./_services/recipe.service";
+import { RecipeService} from './_services/recipe.service';
 import { SettingsService } from './_services/settings.service';
 import { PluginService } from './_services/plugin.service';
 import { AuthService } from './_services/auth.service';
@@ -181,6 +181,10 @@ import { DeviceTagSelectionComponent } from './device/device-tag-selection/devic
 import { MSEPlayerComponent } from './gui-helpers/webcam-player/mse-player/mse-player.component';
 import { WebcamPlayerComponent } from './gui-helpers/webcam-player/webcam-player.component';
 import { WebcamPlayerDialogComponent } from './gui-helpers/webcam-player/webcam-player-dialog/webcam-player-dialog.component';
+import { ScriptEditorParamComponent } from './scripts/script-editor/script-editor-param/script-editor-param.component';
+import { TagPropertyEditS7Component } from './device/tag-property/tag-property-edit-s7/tag-property-edit-s7.component';
+import { TagPropertyEditServerComponent } from './device/tag-property/tag-property-edit-server/tag-property-edit-server.component';
+import { TagPropertyEditModbusComponent } from './device/tag-property/tag-property-edit-modbus/tag-property-edit-modbus.component';
 import { RecipeComponent, DialogRecipe } from './recipe/recipe.component';
 import { RecipeUploadComponent } from './recipe/recipe-upload/recipe-upload.component';
 import { MonitorPropertyComponent } from './gauges/controls/html-monitor/monitor-property/monitor-property.component';
@@ -209,6 +213,9 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         DeviceComponent,
         DeviceTagSelectionComponent,
         TagPropertyComponent,
+        TagPropertyEditS7Component,
+        TagPropertyEditServerComponent,
+        TagPropertyEditModbusComponent,
         TagOptionsComponent,
         TopicPropertyComponent,
         DevicePropertyComponent,
@@ -296,7 +303,7 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         ScriptModeComponent,
         ReportListComponent,
         ReportEditorComponent,
-        DialogScriptParam,
+        ScriptEditorParamComponent,
         TextListComponent,
         LogsViewComponent,
         NgxGaugeComponent,
@@ -331,8 +338,8 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         PanelComponent,
         PanelPropertyComponent,
         WebcamPlayerComponent,
-        MSEPlayerComponent,
         WebcamPlayerDialogComponent,
+        MSEPlayerComponent,
         RecipeComponent,
         DialogRecipe,
         RecipeUploadComponent,
@@ -405,7 +412,6 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         AuthGuard,
         ToastNotifierService,
         MyFileService,
-        DatePipe,
         {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: myCustomTooltipDefaults}
     ],
     bootstrap: [AppComponent]

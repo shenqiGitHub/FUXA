@@ -348,6 +348,7 @@
     "table.property-cols": "列",
     "table.property-rows": "行",
     "table.property-column-type": "列类型",
+    "table.property-column-aggType": "聚合类型",
     "table.property-column-name": "名称",
     "table.property-column-label": "标签",
     "table.property-column-variable": "变量",

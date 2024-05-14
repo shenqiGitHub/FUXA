@@ -32,12 +32,12 @@ function S7client(_data, _logger, _events) {
         return new Promise(function (resolve, reject) {
             if (data.property && data.property.rack >= 0 && data.property.slot >= 0) {
                 try {
-                    if (!s7client.Connected() && _checkWorking(true)) {
+                    if (!s7client.Connected() && _checkWorking(true, '111')) {
                         logger.info(`'${data.name}' try to connect ${data.property.address}`, true);
                         s7client.SetConnectionType(data.property.connectionOption);
                         s7client.ConnectTo(data.property.address, data.property.rack, data.property.slot, function (err) {
                             if (err) {
-                                logger.error(`'${data.name}' connect failed! ${err}, errortext: ${s7client.ErrorText(err)}`);
+                                logger.error(`'${data.name}' connect failed! ${err}`);
                                 _emitStatus('connect-error');
                                 _clearVarsValue();
                                 reject();
@@ -97,7 +97,7 @@ function S7client(_data, _logger, _events) {
      * Update the tags values list, save in DAQ if value changed or in interval and emit values to clients
      */
     this.polling = function () {
-        if (_checkWorking(true)) {
+        if (_checkWorking(true )) {
             var readVarsfnc = [];
             for (var dbnum in db) {
                 readVarsfnc.push(_readDB(parseInt(dbnum), Object.values(db[dbnum].Items)));
@@ -108,7 +108,7 @@ function S7client(_data, _logger, _events) {
                 })
             }
             Promise.all(readVarsfnc).then(result => {
-                    _checkWorking(false);
+                _checkWorking(false );
                 if (result.length) {
                     let varsValueChanged = _updateVarsValue(result);
                     lastTimestampValue = new Date().getTime();
@@ -433,7 +433,7 @@ function S7client(_data, _logger, _events) {
     var _checkWorking = function (check) {
         if (check && working) {
             overloading++;
-            logger.warn(`'${data.name}' working (connection || polling) overload! ${overloading}`);
+            logger.warn(`'${data.name}' working (connection || polling) overload! ${overloading} ` );
             // !The driver don't give the break connection
             if (overloading >= 3) {
                 s7client.Disconnect();
@@ -468,19 +468,22 @@ function S7client(_data, _logger, _events) {
                 }
             });
             s7client.DBRead(DBNr, offset, end - offset, (err, res) => {
-                if (err) return _getErr(err);
-                vars.map(v => {
-                    let value = null;
-                    if (v.type === 'BOOL') {
-                        // check the full byte and send all bit if there is a change 
-                        value = datatypes['BYTE'].parser(res, v.Start - offset, -1);
-                    } else {
-                        value = datatypes[v.type].parser(res, v.Start - offset, v.bit);
-                    }
-                    v.changed = value !== v.value;
-                    v.value = value;
-                    return v;
-                });
+                if (err) {
+                    logger.error(`'${data.name}' ${err}: ${_getErr(err)}`, false);
+                } else {
+                    vars.map(v => {
+                        let value = null;
+                        if (v.type === 'BOOL') {
+                            // check the full byte and send all bit if there is a change
+                            value = datatypes['BYTE'].parser(res, v.Start - offset, -1);
+                        } else {
+                            value = datatypes[v.type].parser(res, v.Start - offset, v.bit);
+                        }
+                        v.changed = value !== v.value;
+                        v.value = value;
+                        return v;
+                    });
+                }
                 resolve(vars);
             });
         });

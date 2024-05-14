@@ -366,29 +366,9 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
         this.goto.emit(device);
     }
 
-    onUploadRecipe(device: Device){
-        this.uploadRecipe(device);
+    withListConfig(device: Device): boolean {
+        return device.type !== DeviceType.ODBC;
     }
-
-
-    private uploadRecipe(device: Device){
-        let dialogRef = this.dialog.open(RecipeUploadComponent,
-            {
-                panelClass: 'dialog-property',
-                data: {
-                    device: device,
-                    devices: this.devices,
-                    projectService: this.projectService
-                },
-                position: { top: '60px' }
-            }
-            );
-        dialogRef.afterClosed().subscribe(result => {
-          if(result){
-            console.log('dialog close');
-          }
-        })
-      }
 
     isDevicePropertyToShow(device: Device) {
         if (device.property && device.type !== 'OPCUA') {
@@ -530,9 +510,6 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
                         if (tempdevice.property.connectionOption) {
                             device.property.connectionOption = tempdevice.property.connectionOption;
                         }
-                        if (tempdevice.property.connectionOption){
-                            device.property.connectionOption = tempdevice.property.connectionOption;
-                        }
                     }
                     this.projectService.setDevice(device, olddevice, result.security);
                 }
@@ -553,11 +530,37 @@ export class DeviceMapComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
+    onUploadRecipe(device: Device){
+        this.uploadRecipe(device);
+    }
+
+    private uploadRecipe(device: Device){
+        let dialogRef = this.dialog.open(RecipeUploadComponent,
+            {
+                panelClass: 'dialog-property',
+                data: {
+                    device: device,
+                    devices: this.devices,
+                    projectService: this.projectService
+                },
+                position: { top: '60px' }
+            }
+        );
+        dialogRef.afterClosed().subscribe(result => {
+            if(result){
+                console.log('dialog close');
+            }
+        });
+    }
+
     plcs(): Device[] {
-        return <Device[]>Object.values(this.devices).filter((d: Device) => d.type !== DeviceType.WebAPI && d.type !== DeviceType.FuxaServer);
+        return <Device[]>Object.values(this.devices).filter((d: Device) => d.type !== DeviceType.WebAPI
+            && d.type !== DeviceType.FuxaServer
+            && d.type !== DeviceType.ODBC);
     }
 
     flows(): Device[] {
-        return <Device[]>Object.values(this.devices).filter((d: Device) => d.type === DeviceType.WebAPI);
+        return <Device[]>Object.values(this.devices).filter((d: Device) => d.type === DeviceType.WebAPI
+            || d.type === DeviceType.ODBC);
     }
 }

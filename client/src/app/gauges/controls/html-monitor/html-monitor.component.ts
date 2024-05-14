@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { GaugeBaseComponent } from '../../gauge-base/gauge-base.component';
 import { GaugeSettings, Variable } from '../../../_models/hmi';
 import { Utils } from '../../../_helpers/utils';
 import { GaugeDialogType } from '../../gauge-property/gauge-property.component';
@@ -18,7 +17,6 @@ export class HtmlMonitorComponent{
   static prefixD = 'D-OXC_';
 
   constructor(private viewContainerRef: ViewContainerRef) {
-      
   }
 
   static getSignals(pro: any) {

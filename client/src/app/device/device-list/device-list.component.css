@@ -1,13 +1,3 @@
-.work-panel {
-    position: absolute;
-    top: 37px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    overflow: auto;
-    background-color: var(--workPanelBackground);
-}
-
 .container {
     display: flex;
     flex-direction: column;
@@ -143,7 +133,7 @@
 }
 
 .my-header-filter-input {
-    display: block; 
+    display: block;
     margin-top: 4px;
     margin-bottom: 6px;
     padding: 3px 1px 3px 2px;
