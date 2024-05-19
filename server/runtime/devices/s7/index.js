@@ -6,6 +6,7 @@ var snap7;
 var datatypes;
 const utils = require('../../utils');
 const deviceUtils = require('../device-utils');
+const { trace, context } = require('@opentelemetry/api');
 
 const MAX_MIX_ITEM = 20;
 
@@ -32,7 +33,7 @@ function S7client(_data, _logger, _events) {
         return new Promise(function (resolve, reject) {
             if (data.property && data.property.rack >= 0 && data.property.slot >= 0) {
                 try {
-                    if (!s7client.Connected() && _checkWorking(true, '111')) {
+                    if (!s7client.Connected() && _checkWorking(true, '36')) {
                         logger.info(`'${data.name}' try to connect ${data.property.address}`, true);
                         s7client.SetConnectionType(data.property.connectionOption);
                         s7client.ConnectTo(data.property.address, data.property.rack, data.property.slot, function (err) {
@@ -96,43 +97,50 @@ function S7client(_data, _logger, _events) {
      * Read values in polling mode 
      * Update the tags values list, save in DAQ if value changed or in interval and emit values to clients
      */
+    const tracer = trace.getTracer('example-tracer');
+
     this.polling = function () {
-        if (_checkWorking(true )) {
-            var readVarsfnc = [];
-            for (var dbnum in db) {
-                readVarsfnc.push(_readDB(parseInt(dbnum), Object.values(db[dbnum].Items)));
-            }
-            if (Object.keys(mixItemsMap).length) {
-                utils.chunkArray(Object.values(mixItemsMap), MAX_MIX_ITEM).forEach((chunk) => {
-                    readVarsfnc.push(_readVars(chunk));
-                })
-            }
-            Promise.all(readVarsfnc).then(result => {
-                _checkWorking(false );
-                if (result.length) {
-                    let varsValueChanged = _updateVarsValue(result);
-                    lastTimestampValue = new Date().getTime();
-                    _emitValues(varsValue);
-                    if (this.addDaq && !utils.isEmptyObject(varsValueChanged)) {
-                        this.addDaq(varsValueChanged, data.name, data.id);
+        tracer.startActiveSpan('polling', (parentSpan) => {
+            if (_checkWorking(true, 104)) {
+                var readVarsfnc = [];
+                for (var dbnum in db) {
+                    readVarsfnc.push(_readDB(parseInt(dbnum), Object.values(db[dbnum].Items)));
+                }
+                if (Object.keys(mixItemsMap).length) {
+                    utils.chunkArray(Object.values(mixItemsMap), MAX_MIX_ITEM).forEach((chunk) => {
+                            readVarsfnc.push(_readVars(chunk));
+                    })
+                }
+                Promise.all(readVarsfnc).then(result => {
+                    _checkWorking(false );
+                    if (result.length) {
+                        let varsValueChanged = _updateVarsValue(result);
+                        lastTimestampValue = new Date().getTime();
+                        _emitValues(varsValue);
+                        if (this.addDaq && !utils.isEmptyObject(varsValueChanged)) {
+                            this.addDaq(varsValueChanged, data.name, data.id);
+                        }
+                    } else {
+                        // console.error('not');
                     }
-                } else {
-                    // console.error('not');
-                }
-                if (lastStatus !== 'connect-ok') {
-                    _emitStatus('connect-ok');
-                }
-            }, reason => {
-                if (reason && reason.stack) {
-                    logger.error(`'${data.name}' _readVars error! ${reason.stack}`);
-                } else {
-                    logger.error(`'${data.name}' _readVars error! ${reason}`);
-                }
-                _checkWorking(false);
-            });
-        } else {
-            _emitStatus('connect-busy');
-        }
+                    if (lastStatus !== 'connect-ok') {
+                        _emitStatus('connect-ok');
+                    }
+                    parentSpan.end();
+                }, reason => {
+                    if (reason && reason.stack) {
+                        logger.error(`'${data.name}' _readVars error! ${reason.stack}`);
+                    } else {
+                        logger.error(`'${data.name}' _readVars error! ${reason}`);
+                    }
+                    _checkWorking(false);
+                    parentSpan.end();
+                });
+            } else {
+                _emitStatus('connect-busy');
+                parentSpan.end();
+            }
+        });
     }
 
     /**
@@ -430,10 +438,10 @@ function S7client(_data, _logger, _events) {
      * Used to manage the async connection and polling automation (that not overloading)
      * @param {*} check 
      */
-    var _checkWorking = function (check) {
+    var _checkWorking = function (check, codeline) {
         if (check && working) {
             overloading++;
-            logger.warn(`'${data.name}' working (connection || polling) overload! ${overloading} ` );
+            logger.warn(`'${data.name}' working (connection || polling) overload! ${overloading} codeline ${codeline} date ${ Date.now()}` );
             // !The driver don't give the break connection
             if (overloading >= 3) {
                 s7client.Disconnect();
