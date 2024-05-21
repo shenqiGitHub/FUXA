@@ -16,21 +16,13 @@
             </span>
         </div>
         <div class="my-form-field item-block mt10">
-            <span>{{'device.tag-property-type' | translate}}</span>
-            <mat-select formControlName="tagType">
-                <mat-option *ngFor="let type of tagType | enumToArray" [value]="type.key">
-                    {{ type.value }}
-                </mat-option>
-            </mat-select>
-        </div>
-        <div class="my-form-field item-block mt10">
-            <span>{{'device.tag-property-address' | translate}}</span>
-            <input formControlName="tagAddress" type="text">
+            <span>{{'device.tag-property-address-sample' | translate}}</span>
+            <input numberOnly formControlName="tagAddress" type="text">
         </div>
         <div class="my-form-field item-block mt10">
             <span>{{'device.tag-property-description' | translate}}</span>
             <input formControlName="tagDescription" type="text">
-        </div>
+        </div>            
     </div>
     <div mat-dialog-actions class="dialog-action">
         <button mat-raised-button (click)="onNoClick()">{{'dlg.cancel' | translate}}</button>

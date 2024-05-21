@@ -28,9 +28,11 @@ export class SettingsService {
     }
 
     async init() {
+        // this language will be used as a fallback when a translation isn't found in the current language
         this.fuxaLanguage.setDefaultLang('en');
+        // the lang to use, if the lang isn't available, it will use the current loader to get them
         this.fuxaLanguage.use('en');
-
+        // to load saved settings
         if (environment.serverEnabled) {
             try {
                 const result = await firstValueFrom(this.http.get<any>(this.endPointConfig + '/api/settings'));
@@ -41,7 +43,6 @@ export class SettingsService {
                 console.error('settings.service err: ' + error);
             }
         }
-        // 根据实际情况决定是否在此处调用
         // this.setLanguage(this.appSettings.language);
     }
 

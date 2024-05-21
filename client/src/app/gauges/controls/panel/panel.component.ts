@@ -10,7 +10,7 @@ import { ProjectService } from '../../../_services/project.service';
 @Component({
     selector: 'app-panel',
     templateUrl: './panel.component.html',
-    styleUrls: ['./panel.component.scss']
+    styleUrls: ['./panel.component.css']
 })
 export class PanelComponent extends GaugeBaseComponent {
     static TypeTag = 'svg-ext-own_ctrl-panel';
@@ -89,6 +89,7 @@ export class PanelComponent extends GaugeBaseComponent {
                                             },
                                             null,
                                             componentRef.instance);
+                componentRef.instance['name'] = gaugeSettings.name;
                 return componentRef.instance;
             }
         }

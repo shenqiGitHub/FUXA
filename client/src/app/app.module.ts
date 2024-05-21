@@ -46,10 +46,9 @@ import { TextListComponent, DialogItemText } from './text-list/text-list.compone
 import { LabComponent } from './lab/lab.component';
 import { DeviceComponent } from './device/device.component';
 import { DevicePropertyComponent } from './device/device-property/device-property.component';
-import { TagPropertyComponent } from './device/tag-property/tag-property.component';
 import { TagOptionsComponent } from './device/tag-options/tag-options.component';
 import { TopicPropertyComponent } from './device/topic-property/topic-property.component';
-import { DeviceListComponent, DialogTagName } from './device/device-list/device-list.component';
+import { DeviceListComponent } from './device/device-list/device-list.component';
 import { DeviceMapComponent } from './device/device-map/device-map.component';
 import { FuxaViewComponent } from './fuxa-view/fuxa-view.component';
 import { CardsViewComponent } from './cards-view/cards-view.component';
@@ -177,13 +176,17 @@ import { PanelPropertyComponent } from './gauges/controls/panel/panel-property/p
 import { UserEditComponent } from './users/user-edit/user-edit.component';
 import { FuxaViewDialogComponent } from './fuxa-view/fuxa-view-dialog/fuxa-view-dialog.component';
 import { DeviceTagSelectionComponent } from './device/device-tag-selection/device-tag-selection.component';
-import { MSEPlayerComponent } from './gui-helpers/webcam-player/mse-player/mse-player.component';
 import { WebcamPlayerComponent } from './gui-helpers/webcam-player/webcam-player.component';
 import { WebcamPlayerDialogComponent } from './gui-helpers/webcam-player/webcam-player-dialog/webcam-player-dialog.component';
 import { ScriptEditorParamComponent } from './scripts/script-editor/script-editor-param/script-editor-param.component';
 import { TagPropertyEditS7Component } from './device/tag-property/tag-property-edit-s7/tag-property-edit-s7.component';
 import { TagPropertyEditServerComponent } from './device/tag-property/tag-property-edit-server/tag-property-edit-server.component';
 import { TagPropertyEditModbusComponent } from './device/tag-property/tag-property-edit-modbus/tag-property-edit-modbus.component';
+import { TagPropertyEditInternalComponent } from './device/tag-property/tag-property-edit-internal/tag-property-edit-internal.component';
+import { TagPropertyEditOpcuaComponent } from './device/tag-property/tag-property-edit-opcua/tag-property-edit-opcua.component';
+import { TagPropertyEditBacnetComponent } from './device/tag-property/tag-property-edit-bacnet/tag-property-edit-bacnet.component';
+import { TagPropertyEditWebapiComponent } from './device/tag-property/tag-property-edit-webapi/tag-property-edit-webapi.component';
+import { TagPropertyEditEthernetipComponent } from './device/tag-property/tag-property-edit-ethernetip/tag-property-edit-ethernetip.component';
 import { RecipeComponent, DialogRecipe } from './recipe/recipe.component';
 import { RecipeUploadComponent } from './recipe/recipe-upload/recipe-upload.component';
 import { MonitorPropertyComponent } from './gauges/controls/html-monitor/monitor-property/monitor-property.component';
@@ -211,10 +214,14 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         LabComponent,
         DeviceComponent,
         DeviceTagSelectionComponent,
-        TagPropertyComponent,
         TagPropertyEditS7Component,
         TagPropertyEditServerComponent,
         TagPropertyEditModbusComponent,
+        TagPropertyEditInternalComponent,
+        TagPropertyEditOpcuaComponent,
+        TagPropertyEditBacnetComponent,
+        TagPropertyEditWebapiComponent,
+        TagPropertyEditEthernetipComponent,
         TagOptionsComponent,
         TopicPropertyComponent,
         DevicePropertyComponent,
@@ -227,7 +234,6 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         DialogMenuItem,
         DialogHeaderItem,
         DeviceListComponent,
-        DialogTagName,
         DeviceMapComponent,
         FuxaViewComponent,
         FuxaViewDialogComponent,
@@ -338,7 +344,6 @@ export const myCustomTooltipDefaults: MatTooltipDefaultOptions = {
         PanelPropertyComponent,
         WebcamPlayerComponent,
         WebcamPlayerDialogComponent,
-        MSEPlayerComponent,
         RecipeComponent,
         DialogRecipe,
         RecipeUploadComponent,

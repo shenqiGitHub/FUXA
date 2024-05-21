@@ -256,7 +256,7 @@ function S7client(_data, _logger, _events) {
                 value = deviceUtils.tagRawCalculator(data[i].value);
                 item.value = value;
                 _writeVars([item], (item instanceof DbItem)).then(result => {
-                    logger.info(`'${data.name}' setValue(${sigid}, ${value})`, true);
+                    logger.info(`'${data.name}' setValue(${value})`, true);
                 }, reason => {
                     if (reason && reason.stack) {
                         logger.error(`'${data.name}' _writeVars error! ${reason.stack}`);

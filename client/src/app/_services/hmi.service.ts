@@ -587,8 +587,6 @@ export class HmiService {
                 break;
         }
     }
-
-
 }
 
 class ViewSignalGaugeMap {

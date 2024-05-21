@@ -7,7 +7,7 @@ import { ProjectData, ProjectDataCmdType, UploadFile } from '../_models/project'
 import { View, LayoutSettings, DaqQuery } from '../_models/hmi';
 import { Chart } from '../_models/chart';
 import { Graph } from '../_models/graph';
-import {Alarm, AlarmExcelExport, AlarmQuery} from '../_models/alarm';
+import {Alarm, AlarmExcelExport, AlarmQuery } from '../_models/alarm';
 import { Notification } from '../_models/notification';
 import { Script } from '../_models/script';
 import { Text } from '../_models/text';
@@ -913,9 +913,9 @@ export class ProjectService {
         return (this.projectData) ? this.projectData.server : null;
     }
 
-    // getDevices(): any {
-    //     return (this.projectData) ? this.projectData.devices : {};
-    // }
+    getServerDevices(): Device[] {
+        return <Device[]>Object.values(this.getDevices()).filter((device: Device) => device.type !== DeviceType.internal);
+    }
 
     getDevices(): any {
         let result = {};

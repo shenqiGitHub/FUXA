@@ -792,6 +792,10 @@ function getAlarms() {
 function setDeviceProperty(query) {
     return new Promise(function (resolve, reject) {
         if (query.query === 'security') {
+            if (!query.value) {
+                resolve();
+                return;
+            }
             prjstorage.setSection({ table: prjstorage.TableType.DEVICESSECURITY, name: query.name, value: query.value }).then(() => {
                 resolve();
             }).catch(function (err) {
@@ -923,6 +927,7 @@ const ProjectDataCmdType = {
     HmiLayout: 'layout',
     Charts: 'charts',
     Graphs: 'graphs',
+    SetText: 'set-text',
     SetText: 'set-text',
     DelText: 'del-text',
     SetAlarm: 'set-alarm',

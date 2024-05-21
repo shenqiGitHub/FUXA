@@ -728,6 +728,7 @@
     "device.property-edit": "编辑设备属性",
     "device.property-remove": "删除设备",
     "device.property-add": "添加设备",
+    "device.upload-recipe": "配方列表",
     "device.not-property-security": "没有安全和加密模式",
     "device.property-port": "端口",
     "device.property-slave-id": "从属ID",

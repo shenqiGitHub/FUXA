@@ -106,6 +106,14 @@ var utils = module.exports = {
         return (ele === null || ele === undefined) ? true : false;
     },
 
+    JsonTryToParse(value) {
+        try {
+            if (value) {
+                return JSON.parse(value);
+            }
+        } catch { }
+    },
+
     mergeObjectsValues: function (obj1, obj2) {
         if (typeof obj1 === 'object' && typeof obj2 === 'object') {
             for (let key in obj2) {
