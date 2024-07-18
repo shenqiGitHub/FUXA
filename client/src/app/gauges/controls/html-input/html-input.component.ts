@@ -318,7 +318,7 @@ export class HtmlInputComponent extends GaugeBaseComponent {
             min: 0,
             max: 0
         };
-        if (ga.property?.options?.numeric || ga.property?.options?.number === InputOptionType.number){
+        if (ga.property?.options?.numeric || ga.property?.options?.type === InputOptionType.number){
             if(!Utils.isNullOrUndefined(ga.property.options.min) && !Utils.isNullOrUndefined(ga.property.options.max)){
                 if(Number.isNaN(value) || !(/^-?[\d.]+$/.test(value))){
                     return {
