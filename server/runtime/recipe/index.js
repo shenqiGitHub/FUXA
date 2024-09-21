@@ -1,8 +1,6 @@
 'use strict';
 
 const recstorage = require('./recstorage');
-var utils = require('./../utils');
-const usrstorage = require("../users/usrstorage");
 
 const version = '1.00';
 var settings;                   // Application settings
@@ -12,7 +10,7 @@ function init(_settings, log) {
     settings = _settings;
     logger = log;
 
-    // Init Users database
+    // Init recipe database
     return new Promise(function (resolve, reject) {
         recstorage.init(settings, logger).then(result => {
             logger.info('recipe.recstorage-init successful!', true);
